@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Check,
@@ -7,13 +7,14 @@ import {
   Github,
   Linkedin,
   Loader2,
-  ArrowRight,
   Home,
   Rocket,
   BarChart2,
   User as UserIcon,
   Flame,
-  CheckCircle2
+  CheckCircle2,
+  Code2,
+  AlertCircle
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -28,15 +29,16 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
   user,
   onNavigate,
 }) => {
-  // Check if Day 12 was previously completed in localStorage
+  // Check if completed in localStorage
+  const storageKey = `abtalks_day_${dayNumber}_completed`;
   const [isSubmitted, setIsSubmitted] = useState<boolean>(() => {
-    return localStorage.getItem(`abtalks_day_${dayNumber}_completed`) === 'true';
+    return localStorage.getItem(storageKey) === 'true';
   });
 
   // Finish Line Checklist state
   const [checklist, setChecklist] = useState({
-    chooseApi: false,
-    buildUi: false,
+    chooseApi: true,
+    buildUi: true,
     connectData: false,
     pushGithub: false,
   });
@@ -57,21 +59,15 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
   const [linkedinVerified, setLinkedinVerified] = useState(false);
   const [linkedinError, setLinkedinError] = useState('');
 
-  // Check if all checklist items are checked
-  const allChecklistDone =
-    checklist.chooseApi &&
-    checklist.buildUi &&
-    checklist.connectData &&
-    checklist.pushGithub;
+  // Calculate items remaining
+  const checkedCount = Object.values(checklist).filter(Boolean).length;
+  const itemsRemaining =
+    (4 - checkedCount) +
+    (!githubVerified ? 1 : 0) +
+    (!linkedinVerified ? 1 : 0);
 
-  // Check if submit button should be enabled
-  const canSubmit =
-    allChecklistDone &&
-    githubRepo.trim().length > 0 &&
-    githubCommit.trim().length > 0 &&
-    linkedinPost.trim().length > 0 &&
-    githubVerified &&
-    linkedinVerified;
+  const allChecklistDone = checkedCount === 4;
+  const canSubmit = itemsRemaining === 0;
 
   // Toggle checklist item
   const toggleChecklist = (key: keyof typeof checklist) => {
@@ -128,7 +124,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
   // Submit Day 12
   const handleSubmitDay = () => {
     if (!canSubmit) return;
-    localStorage.setItem(`abtalks_day_${dayNumber}_completed`, 'true');
+    localStorage.setItem(storageKey, 'true');
     setIsSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -159,14 +155,17 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
       {/* MAIN CONTAINER */}
       <main className="max-w-md mx-auto px-4 pt-5 space-y-5">
         
-        {/* SUCCESS STATE DISPLAY (IF SUBMITTED) */}
+        {/* COMPLETED DAY STATE (IF ALREADY SUBMITTED) */}
         {isSubmitted ? (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-emerald-200 text-center space-y-5 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl p-6 shadow-xs border border-emerald-200 text-center space-y-5 animate-in fade-in duration-300">
             <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-inner">
               <CheckCircle2 className="w-10 h-10 stroke-[2.2]" />
             </div>
 
             <div className="space-y-1">
+              <span className="font-mono-code text-[10px] font-bold text-emerald-800 tracking-wider uppercase bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                DAY {dayNumber} COMPLETE
+              </span>
               <h1 className="text-2xl font-extrabold text-[#191c1e]">
                 Day {dayNumber} complete 🎉
               </h1>
@@ -182,6 +181,17 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
               <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 flex items-center gap-1">
                 LinkedIn <Check className="w-3.5 h-3.5 stroke-[3]" />
               </span>
+            </div>
+
+            {/* Submission Summary Box */}
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-left space-y-2">
+              <p className="text-[11px] font-mono-code font-bold text-slate-500 uppercase">
+                View your submission:
+              </p>
+              <div className="text-xs font-mono-code text-[#4c5b71] space-y-1 truncate">
+                <p className="truncate">✓ {githubRepo || 'https://github.com/nitish/api-project'}</p>
+                <p className="truncate">✓ {linkedinPost || 'https://linkedin.com/posts/nitish-day12'}</p>
+              </div>
             </div>
 
             <button
@@ -258,9 +268,14 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
 
             {/* 4. TODAY'S FINISH LINE */}
             <section className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 space-y-3">
-              <h2 className="text-base font-bold text-[#191c1e]">
-                Today's finish line
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold text-[#191c1e]">
+                  Today's finish line
+                </h2>
+                <span className="text-[11px] font-mono-code font-bold text-[#4c5b71]">
+                  {checkedCount}/4 Done
+                </span>
+              </div>
 
               <div className="space-y-2">
                 {[
@@ -443,9 +458,10 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                 </div>
 
                 {githubError && (
-                  <p className="text-[11px] font-medium text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-200">
-                    {githubError}
-                  </p>
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] font-medium text-rose-700 flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                    <span>{githubError}</span>
+                  </div>
                 )}
 
                 {githubVerified ? (
@@ -463,7 +479,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                     {githubVerifying ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Verifying GitHub...</span>
+                        <span>Checking GitHub proof…</span>
                       </>
                     ) : (
                       <span>Verify GitHub</span>
@@ -504,9 +520,10 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                 </div>
 
                 {linkedinError && (
-                  <p className="text-[11px] font-medium text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-200">
-                    {linkedinError}
-                  </p>
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] font-medium text-rose-700 flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                    <span>{linkedinError}</span>
+                  </div>
                 )}
 
                 {linkedinVerified ? (
@@ -524,7 +541,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                     {linkedinVerifying ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Verifying LinkedIn...</span>
+                        <span>Checking LinkedIn proof…</span>
                       </>
                     ) : (
                       <span>Verify LinkedIn</span>
@@ -571,8 +588,56 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
               </div>
             </section>
 
-            {/* 8. SUBMIT DAY BUTTON */}
-            <section className="pt-2">
+            {/* 8. SUBMISSION PROGRESS INDICATOR */}
+            <section className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono-code text-[11px] font-extrabold text-[#4c5b71] tracking-wider uppercase">
+                  PROOF STATUS
+                </span>
+                <span
+                  className={`font-mono-code text-[11px] font-bold ${
+                    canSubmit ? 'text-emerald-700' : 'text-amber-700'
+                  }`}
+                >
+                  {canSubmit ? 'Ready to submit' : `${itemsRemaining} items remaining`}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono-code font-bold">
+                <div
+                  className={`p-2 rounded-lg border ${
+                    githubVerified
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : 'bg-slate-50 border-slate-200 text-slate-400'
+                  }`}
+                >
+                  GitHub {githubVerified ? '✓' : '○'}
+                </div>
+
+                <div
+                  className={`p-2 rounded-lg border ${
+                    linkedinVerified
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : 'bg-slate-50 border-slate-200 text-slate-400'
+                  }`}
+                >
+                  LinkedIn {linkedinVerified ? '✓' : '○'}
+                </div>
+
+                <div
+                  className={`p-2 rounded-lg border ${
+                    allChecklistDone
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : 'bg-slate-50 border-slate-200 text-slate-400'
+                  }`}
+                >
+                  Checklist {checkedCount}/4
+                </div>
+              </div>
+            </section>
+
+            {/* 9. SUBMIT DAY BUTTON */}
+            <section className="pt-1">
               <button
                 type="button"
                 disabled={!canSubmit}
@@ -586,21 +651,15 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                   }
                 `}
               >
-                <span>Submit Day 12 →</span>
+                <span>Submit Day {dayNumber} →</span>
               </button>
-
-              {!canSubmit && (
-                <p className="text-[11px] text-center text-slate-400 font-medium mt-2">
-                  Complete all finish-line items & verify both links to enable submission.
-                </p>
-              )}
             </section>
           </>
         )}
 
       </main>
 
-      {/* 9. FIXED BOTTOM NAVIGATION */}
+      {/* 10. FIXED BOTTOM NAVIGATION */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-lg">
         {/* HOME */}
         <button
@@ -622,7 +681,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
 
         {/* PROGRESS */}
         <button
-          onClick={() => onNavigate('/dashboard')}
+          onClick={() => onNavigate('/progress')}
           className="flex flex-col items-center justify-center py-1 px-3 text-slate-400 hover:text-[#4c5b71] transition-colors cursor-pointer"
         >
           <BarChart2 className="w-5 h-5 stroke-[2]" />

@@ -10,6 +10,7 @@ import { AuthPage } from './components/AuthPage';
 import { DashboardPage } from './components/DashboardPage';
 import { DayChallengePage } from './components/DayChallengePage';
 import { ProfilePage } from './components/ProfilePage';
+import { ProgressPage } from './components/ProgressPage';
 import { UserProfile } from './types';
 
 export default function App() {
@@ -44,7 +45,7 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // CTA Click handler from Landing Page: redirects to /auth as requested
+  // CTA Click handler from Landing Page: redirects to /auth
   const handleStartChallengeFromLanding = () => {
     handleNavigate('/auth');
   };
@@ -59,6 +60,10 @@ export default function App() {
 
   const handleLoginSuccess = (userProfile: UserProfile) => {
     setUser(userProfile);
+  };
+
+  const handleUpdateUser = (updatedProfile: UserProfile) => {
+    setUser(updatedProfile);
   };
 
   const handleLogout = () => {
@@ -88,6 +93,16 @@ export default function App() {
     );
   }
 
+  // Route: /progress
+  if (currentRoute === '/progress') {
+    return (
+      <ProgressPage
+        user={user}
+        onNavigate={handleNavigate}
+      />
+    );
+  }
+
   // Route: /profile
   if (currentRoute === '/profile') {
     return (
@@ -95,6 +110,7 @@ export default function App() {
         user={user}
         onNavigate={handleNavigate}
         onLogout={handleLogout}
+        onUpdateUser={handleUpdateUser}
       />
     );
   }

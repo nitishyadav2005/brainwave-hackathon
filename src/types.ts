@@ -20,6 +20,10 @@ export interface UserProfile {
   college?: string;
   track?: string;
   streak: number;
+  longestStreak?: number;
+  currentDay?: number;
+  completedDays?: number;
+  missedYesterday?: boolean;
   isAuthenticated: boolean;
 }
 

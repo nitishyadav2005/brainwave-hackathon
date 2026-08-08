@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { UserProfile } from '../types';
 import {
   Flame,
@@ -9,7 +9,10 @@ import {
   Rocket,
   BarChart2,
   User as UserIcon,
-  ArrowRight
+  ArrowRight,
+  RefreshCw,
+  Sparkles,
+  Calendar
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -21,15 +24,26 @@ interface DashboardPageProps {
 export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, onLogout }) => {
   const journeyRef = useRef<HTMLDivElement>(null);
 
-  // Read user details from props or fallback to ABTalks default student mock data
+  // Demo mode state to easily preview First Day, Missed Yesterday, and Standard Day 12
+  const [demoState, setDemoState] = useState<'standard' | 'firstDay' | 'missedYesterday'>(() => {
+    if (user?.currentDay === 1 && user?.streak === 0) return 'firstDay';
+    if (user?.missedYesterday) return 'missedYesterday';
+    return 'standard';
+  });
+
+  // Derived variables based on current user / demo mode
   const name = user?.name || 'Nitish';
   const college = user?.college || 'ABES Engineering College';
   const track = user?.track || 'Full Stack Development';
 
-  const streakDays = 11;
-  const currentDay = 12;
+  const isFirstDay = demoState === 'firstDay';
+  const isMissedYesterday = demoState === 'missedYesterday';
+
+  const currentDay = isFirstDay ? 1 : (user?.currentDay ?? 12);
+  const streakDays = isFirstDay ? 0 : (user?.streak ?? 11);
+  const completedDays = isFirstDay ? 0 : (currentDay > 1 ? currentDay - 1 : 0);
   const totalDays = 60;
-  const completionPercentage = 20; // 12 / 60 = 20%
+  const completionPercentage = isFirstDay ? 0 : Math.round((completedDays / totalDays) * 100);
 
   const scrollToJourney = () => {
     if (journeyRef.current) {
@@ -39,7 +53,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-32 selection:bg-[#4c5b71]/15">
-      {/* 1. TOP HEADER (56px-64px tall, minimal, no hamburger menu) */}
+      {/* 1. TOP HEADER (Minimal 56px tall, profile avatar on right) */}
       <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4">
         <div className="max-w-md mx-auto h-full flex items-center justify-between">
           <span
@@ -59,9 +73,46 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
         </div>
       </header>
 
-      {/* MAIN CONTAINER (Centered & constrained for mobile 390px, scalable for tablet/desktop) */}
+      {/* MAIN CONTAINER (Centered 390px layout) */}
       <main className="max-w-md mx-auto px-4 pt-5 space-y-5">
         
+        {/* SUBTLE STATE SWITCHER FOR REVIEW (Pill Controls) */}
+        <div className="bg-slate-200/60 p-1 rounded-xl flex items-center justify-between text-[11px] font-mono-code">
+          <span className="text-slate-500 font-bold px-2">State:</span>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setDemoState('standard')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                demoState === 'standard'
+                  ? 'bg-white text-[#4c5b71] shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Day 12
+            </button>
+            <button
+              onClick={() => setDemoState('firstDay')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                demoState === 'firstDay'
+                  ? 'bg-white text-[#4c5b71] shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              First Day
+            </button>
+            <button
+              onClick={() => setDemoState('missedYesterday')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                demoState === 'missedYesterday'
+                  ? 'bg-white text-[#4c5b71] shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Missed Yesterday
+            </button>
+          </div>
+        </div>
+
         {/* 2. GREETING */}
         <section className="space-y-0.5">
           <h1 className="text-[28px] leading-tight font-extrabold text-[#191c1e] tracking-tight">
@@ -69,9 +120,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             <span className="text-[#4c5b71]">{name}</span>
           </h1>
           <p className="text-sm text-slate-500 font-medium">
-            Ready to crush your goals today?
+            {isFirstDay
+              ? 'Welcome to your 60-day coding journey!'
+              : isMissedYesterday
+              ? 'Ready to get back on track today?'
+              : 'Ready to crush your goals today?'}
           </p>
         </section>
+
+        {/* MISSED-DAY RECOVERY BANNER (Subtle & Encouraging) */}
+        {isMissedYesterday && (
+          <section className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 shadow-2xs space-y-1.5 animate-in fade-in">
+            <div className="flex items-center gap-2 text-amber-800 font-bold text-xs">
+              <RefreshCw className="w-4 h-4 text-amber-600" />
+              <span>Yesterday was missed.</span>
+            </div>
+            <p className="text-xs text-amber-900/80 font-medium leading-relaxed">
+              That's okay. Your next build starts today. Every legend has days they reset — keep pushing forward!
+            </p>
+          </section>
+        )}
 
         {/* 3. STREAK CARD */}
         <section className="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex items-center gap-4 relative overflow-hidden">
@@ -85,12 +153,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                 {streakDays} Day
               </span>
               <span className="font-mono-code text-[10px] font-bold text-[#4c5b71] tracking-wider uppercase bg-slate-100 px-2 py-0.5 rounded-md">
-                ACTIVE STREAK
+                {isFirstDay ? 'NEW STREAK' : 'ACTIVE STREAK'}
               </span>
             </div>
 
             <p className="text-xs text-slate-600 font-medium mt-0.5">
-              Keep showing up. <span className="text-slate-400">•</span> <span className="text-slate-500 font-semibold">1 day away from 12</span>
+              {isFirstDay ? (
+                <span className="text-[#4c5b71] font-bold">Your streak starts today.</span>
+              ) : (
+                <>
+                  Keep showing up. <span className="text-slate-400">•</span>{' '}
+                  <span className="text-slate-500 font-semibold">
+                    1 day away from {streakDays + 1}
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </section>
@@ -103,17 +180,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               TODAY'S MISSION
             </span>
             <span className="bg-[#4c5b71] text-white font-mono-code text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-              DAY {currentDay}
+              DAY {isFirstDay ? '01' : currentDay}
             </span>
           </div>
 
           {/* Title & Description */}
           <div className="space-y-1.5">
             <h2 className="text-xl font-bold text-[#191c1e] leading-snug">
-              Build something useful with an API
+              {isFirstDay
+                ? 'Welcome to ABTalks & First Commit'
+                : 'Build something useful with an API'}
             </h2>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Build a small practical project using a public API and turn the data into something people can use.
+              {isFirstDay
+                ? 'Set up your local workspace, create your first GitHub repository, and push a working README to kick off your 60-day challenge.'
+                : 'Build a small practical project using a public API and turn the data into something people can use.'}
             </p>
           </div>
 
@@ -123,10 +204,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               FULL STACK
             </span>
             <span className="bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md border border-amber-200/60 uppercase">
-              MEDIUM
+              {isFirstDay ? 'EASY' : 'MEDIUM'}
             </span>
             <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md border border-slate-200/60 uppercase">
-              60–90 MIN
+              {isFirstDay ? '15–30 MIN' : '60–90 MIN'}
             </span>
           </div>
 
@@ -135,8 +216,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             onClick={() => onNavigate(`/day/${currentDay}`)}
             className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3 px-4 rounded-xl shadow-sm transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer mt-2"
           >
-            <span>Continue to Day {currentDay}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>
+              {isFirstDay
+                ? 'Start Day 01 →'
+                : isMissedYesterday
+                ? 'Continue Challenge →'
+                : `Continue to Day ${currentDay} →`}
+            </span>
           </button>
         </section>
 
@@ -149,10 +235,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             </h3>
             <div className="text-right">
               <span className="font-mono-code text-xs font-bold text-[#191c1e]">
-                12 / 60 DAYS
+                {completedDays} / 60 DAYS
               </span>
               <span className="font-mono-code text-[11px] font-bold text-[#4c5b71] ml-2">
-                20% COMPLETE
+                {completionPercentage}% COMPLETE
               </span>
             </div>
           </div>
@@ -170,9 +256,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             <div className="grid grid-cols-6 gap-2">
               {Array.from({ length: totalDays }, (_, i) => {
                 const dayNum = i + 1;
-                const isCompleted = dayNum <= streakDays; // 1 to 11
-                const isCurrent = dayNum === currentDay;  // 12
-                const isUpcoming = dayNum > currentDay;   // 13 to 60
+                const isCompleted = !isFirstDay && dayNum <= completedDays;
+                const isCurrent = dayNum === currentDay;
 
                 return (
                   <button
@@ -214,11 +299,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono-code text-slate-500">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-xs bg-[#d3e4fe] inline-block" />
-                <span>Completed (11)</span>
+                <span>Completed ({completedDays})</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-xs bg-[#4c5b71] inline-block" />
-                <span>Active (Day 12)</span>
+                <span>Active (Day {currentDay})</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-xs bg-[#f1f3f5] border border-slate-200 inline-block" />
@@ -273,7 +358,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
       {/* 7. FIXED BOTTOM NAVIGATION */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-lg">
-        {/* HOME */}
+        {/* HOME (ACTIVE) */}
         <button
           onClick={() => onNavigate('/dashboard')}
           className="flex flex-col items-center justify-center py-1 px-3 text-[#4c5b71] cursor-pointer"
@@ -293,7 +378,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
         {/* PROGRESS */}
         <button
-          onClick={scrollToJourney}
+          onClick={() => onNavigate('/progress')}
           className="flex flex-col items-center justify-center py-1 px-3 text-slate-400 hover:text-[#4c5b71] transition-colors cursor-pointer"
         >
           <BarChart2 className="w-5 h-5 stroke-[2]" />
