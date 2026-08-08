@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
+import { getEffectiveUserProgress } from '../utils/userProgress';
 
 interface ProfilePageProps {
   user: UserProfile | null;
@@ -41,8 +42,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [trackInput, setTrackInput] = useState(user?.track || 'Full Stack Development');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
 
-  const currentDay = user?.currentDay ?? 12;
-  const streakDays = user?.streak ?? 11;
+  const progress = getEffectiveUserProgress(user);
+  const currentDay = progress.currentDay;
+  const streakDays = progress.streakDays;
+  const completedDays = progress.completedDays;
 
   const isProfileEmpty = !nameInput.trim() || !collegeInput.trim();
 
@@ -56,8 +59,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       email: user?.email || `${nameInput.toLowerCase().replace(/\s+/g, '')}@student.edu`,
       college: collegeInput.trim() || 'ABES Engineering College',
       track: trackInput.trim() || 'Full Stack Development',
-      streak: user?.streak ?? 11,
-      currentDay: user?.currentDay ?? 12,
+      streak: streakDays,
+      currentDay: currentDay,
+      completedDays: completedDays,
       isAuthenticated: true,
     };
 

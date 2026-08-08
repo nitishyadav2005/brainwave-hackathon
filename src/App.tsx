@@ -13,6 +13,7 @@ import { ProfilePage } from './components/ProfilePage';
 import { ProgressPage } from './components/ProgressPage';
 import { UserProfile } from './types';
 import { formatFirstName } from './utils/nameUtils';
+import { getEffectiveUserProgress } from './utils/userProgress';
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
@@ -25,13 +26,10 @@ export default function App() {
       const parsed = saved ? JSON.parse(saved) : null;
       if (parsed) {
         parsed.name = formatFirstName(parsed.name);
-        const hasSubmittedDay12 = localStorage.getItem('abtalks_day12_submitted') === 'true';
-        if (!hasSubmittedDay12) {
-          parsed.day12Completed = false;
-          parsed.currentDay = 12;
-          parsed.streak = 11;
-          parsed.completedDays = 11;
-        }
+        const progress = getEffectiveUserProgress(parsed);
+        parsed.currentDay = progress.currentDay;
+        parsed.streak = progress.streakDays;
+        parsed.completedDays = progress.completedDays;
         localStorage.setItem('abtalks_user', JSON.stringify(parsed));
       }
       return parsed;

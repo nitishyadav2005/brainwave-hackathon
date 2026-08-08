@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
+import { getEffectiveUserProgress } from '../utils/userProgress';
 import {
   Flame,
   Check,
@@ -34,33 +35,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const isFirstDay = user?.currentDay === 1 && user?.streak === 0;
   const isMissedYesterday = !!user?.missedYesterday;
 
-  let highestSubmittedDay = 0;
-  if (typeof window !== 'undefined') {
-    for (let i = 1; i <= 60; i++) {
-      if (
-        localStorage.getItem(`abtalks_day${i}_submitted`) === 'true' ||
-        localStorage.getItem(`abtalks_day${i}_completed`) === 'true'
-      ) {
-        highestSubmittedDay = Math.max(highestSubmittedDay, i);
-      }
-    }
-  }
-
-  const userBaseDay = user?.currentDay || 12;
-  const userCompletedBase = user?.completedDays || 11;
-
-  const currentDay = isFirstDay
-    ? 1
-    : Math.max(userBaseDay, highestSubmittedDay > 0 ? highestSubmittedDay + 1 : 12);
-  const streakDays = isFirstDay
-    ? 0
-    : Math.max(userCompletedBase, highestSubmittedDay > 0 ? highestSubmittedDay : 11);
-  const completedDays = streakDays;
+  const progress = getEffectiveUserProgress(user);
+  const currentDay = progress.currentDay;
+  const streakDays = progress.streakDays;
+  const completedDays = progress.completedDays;
   const totalDays = 60;
   const progressDay = isFirstDay ? 0 : currentDay;
-  const completionPercentage = isFirstDay
-    ? 0
-    : Math.round((progressDay / totalDays) * 100);
+  const completionPercentage = isFirstDay ? 0 : progress.completionPercentage;
 
   const scrollToJourney = () => {
     if (journeyRef.current) {

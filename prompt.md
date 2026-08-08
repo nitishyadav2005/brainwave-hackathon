@@ -239,4 +239,15 @@ DYNAMIC PROGRESS PERCENTAGE FOR DAY CHALLENGE HEADER
 3. Dynamically updated streak text, proof preview labels, and DashboardPage progress calculation scanner.
 ```
 
+---
+
+## 13. Unified Dynamic User Progress Tracking Across App
+
+```text
+UNIFIED DYNAMIC PROGRESS ENGINE (PROFILE, PROGRESS, DASHBOARD, DAY CHALLENGE)
+
+1. Created `/src/utils/userProgress.ts` (`getEffectiveUserProgress`) to calculate actual user progress dynamically by scanning `localStorage` for submitted/completed days.
+2. Synchronized `ProfilePage.tsx` stats (Streak Days & Challenge Day) to dynamically display `13 Days STREAK` and `Day 13 / 60 CHALLENGE` (or `Day 14 / 60`) when 13 days are completed, instead of fallback default values.
+3. Updated `App.tsx`, `DashboardPage.tsx`, `ProgressPage.tsx`, and `DayChallengePage.tsx` to share the same dynamic calculation source.
+```
 

@@ -169,9 +169,9 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
         email: parsedUser.email || 'nitish@example.com',
         college: parsedUser.college || 'ABES Engineering College',
         track: parsedUser.track || 'Full Stack Development',
-        currentDay: dayNumber + 1, // 13
-        streak: dayNumber, // 12
-        completedDays: dayNumber, // 12
+        currentDay: Math.max(parsedUser.currentDay || 0, dayNumber + 1),
+        streak: Math.max(parsedUser.streak || 0, dayNumber),
+        completedDays: Math.max(parsedUser.completedDays || 0, dayNumber),
         day12Completed: true,
         isAuthenticated: true,
       };

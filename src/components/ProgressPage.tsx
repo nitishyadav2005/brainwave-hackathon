@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserProfile } from '../types';
+import { getEffectiveUserProgress } from '../utils/userProgress';
 import {
   ArrowLeft,
   Flame,
@@ -18,13 +19,14 @@ interface ProgressPageProps {
 }
 
 export const ProgressPage: React.FC<ProgressPageProps> = ({ user, onNavigate }) => {
-  const currentDay = user?.currentDay ?? 12;
-  const streakDays = user?.streak ?? 11;
-  const longestStreak = user?.longestStreak ?? 11;
-  const completedDays = user?.completedDays ?? (currentDay > 1 ? currentDay - 1 : 0);
+  const progress = getEffectiveUserProgress(user);
+  const currentDay = progress.currentDay;
+  const streakDays = progress.streakDays;
+  const completedDays = progress.completedDays;
+  const longestStreak = Math.max(user?.longestStreak ?? 11, streakDays);
   const totalDays = 60;
   const remainingDays = totalDays - completedDays;
-  const completionPercentage = Math.round((currentDay / totalDays) * 100);
+  const completionPercentage = progress.completionPercentage;
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-36 selection:bg-[#4c5b71]/15 overflow-x-hidden">
