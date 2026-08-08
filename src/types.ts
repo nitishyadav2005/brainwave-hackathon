@@ -13,3 +13,14 @@ export interface GridDayState {
   status: 'completed' | 'current' | 'upcoming';
   title?: string;
 }
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  college?: string;
+  track?: string;
+  streak: number;
+  isAuthenticated: boolean;
+}
+
+export type AuthMode = 'select' | 'signin' | 'signup';

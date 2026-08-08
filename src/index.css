@@ -16,7 +16,7 @@
 /* Soft Claymorphic & Tactile Card Shadows matching reference design */
 .clay-card-deep {
   background-color: #ffffff;
-  border-radius: 1.25rem;
+  border-radius: 1.5rem;
   box-shadow: 
     0 12px 30px -8px rgba(100, 116, 139, 0.08),
     0 4px 12px -2px rgba(100, 116, 139, 0.04),
@@ -26,12 +26,33 @@
 
 .clay-card-shallow {
   background-color: #ffffff;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   box-shadow: 
     0 8px 20px -6px rgba(100, 116, 139, 0.06),
     0 2px 6px -1px rgba(100, 116, 139, 0.03),
     inset 0 1px 2px rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.clay-inset {
+  box-shadow: inset 4px 4px 10px #d8dadc, inset -4px -4px 10px #ffffff;
+  border-radius: 1.25rem;
+  background-color: #f8f9fb;
+}
+
+.clay-pill {
+  box-shadow: 2px 2px 6px #d8dadc, -2px -2px 6px #ffffff, inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+  border: 1px solid #c4c6cd;
+  border-radius: 9999px;
+  background-color: #ffffff;
+}
+
+.clay-marker-done {
+  box-shadow: inset 2px 2px 4px rgba(76, 91, 113, 0.15), inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.clay-marker-pending {
+  box-shadow: 2px 2px 4px #d8dadc, -2px -2px 4px #ffffff;
 }
 
 .clay-btn-primary {
