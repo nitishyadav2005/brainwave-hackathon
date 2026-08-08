@@ -157,7 +157,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onNavigate={handleNavigate} />
 
       {/* Interactive Track Selector Modal */}
       <TrackModal
