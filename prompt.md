@@ -124,3 +124,19 @@ FINAL UI POLISH PASS FOR ABTALKS.
 4. Typography & Spacing: Consistent rhythmic spacing system (4, 8, 12, 16, 20, 24, 32px).
 5. Error & Success States: Inline error alerts, crisp verified status indicators.
 ```
+
+---
+
+## 5. Prompt History Logging Request
+
+```text
+abhi tak hamari jitni bhi chats hue hau usse prompt.md file me dal de
+```
+
+---
+
+## 6. Continuous Logging Directive
+
+```text
+prompt wali file har 1 chat ke bad update karte rehna
+```
