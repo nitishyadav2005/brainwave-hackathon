@@ -13,7 +13,6 @@ import {
   BarChart2,
   User as UserIcon,
   LogOut,
-  ArrowRight,
   Code2
 } from 'lucide-react';
 
@@ -33,56 +32,53 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const totalDays = 60;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-28 md:pb-12 selection:bg-[#4c5b71]/15">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 shadow-xs">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1.5 rounded-lg text-[#4c5b71] hover:bg-slate-100 transition-colors cursor-pointer"
-              aria-label="Toggle menu"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
+    <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-32 selection:bg-[#4c5b71]/15">
+      {/* TopAppBar (Shared Component) */}
+      <header className="bg-[#f8f9fb] sticky top-0 w-full z-50 shadow-[inset_0_2px_4px_rgba(255,255,255,0.8),0_4px_12px_rgba(76,91,113,0.1)] flex justify-between items-center px-4 md:px-6 py-3 border-b border-slate-200/60">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-1 rounded-lg text-[#4c5b71] hover:opacity-80 active:scale-95 transition-all cursor-pointer"
+            aria-label="Toggle Menu"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <span
+            onClick={() => onNavigate('/')}
+            className="font-extrabold text-xl md:text-2xl tracking-tight text-[#4c5b71] cursor-pointer select-none"
+          >
+            ABTalks
+          </span>
+        </div>
 
-            <span
-              onClick={() => onNavigate('/')}
-              className="font-extrabold text-xl tracking-tight text-[#4c5b71] cursor-pointer select-none"
-            >
-              ABTalks
-            </span>
-          </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onLogout}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[#4c5b71] bg-white border border-slate-200 shadow-xs hover:bg-slate-50 transition-all cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5 text-slate-400" />
+            <span>Sign Out</span>
+          </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onLogout}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 bg-white border border-slate-200 shadow-xs hover:bg-slate-50 transition-all cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5 text-slate-400" />
-              <span>Sign Out</span>
-            </button>
-
-            {/* Profile Headshot Avatar */}
-            <div
-              onClick={() => setActiveTab('profile')}
-              className="w-9 h-9 rounded-full bg-[#64748b] text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:opacity-90 transition-opacity border border-white"
-            >
-              {userName.charAt(0).toUpperCase()}
-            </div>
+          {/* User Headshot Avatar */}
+          <div
+            onClick={() => setActiveTab('profile')}
+            className="w-10 h-10 rounded-full bg-[#64748b] text-white overflow-hidden cursor-pointer hover:opacity-80 active:scale-95 transition-all flex items-center justify-center font-bold text-sm shadow-xs border-2 border-white"
+          >
+            {userName.charAt(0).toUpperCase()}
           </div>
         </div>
 
         {/* Dropdown Menu */}
         {menuOpen && (
-          <div className="bg-white border-b border-slate-200 px-4 py-3 shadow-lg max-w-3xl mx-auto animate-in fade-in duration-150">
+          <div className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 px-4 py-3 shadow-lg max-w-3xl mx-auto animate-in fade-in duration-150">
             <div className="flex flex-col gap-2">
               <div className="p-3 bg-[#f8f9fb] rounded-xl border border-slate-100 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold text-[#1e293b]">{userName}</p>
                   <p className="text-[11px] text-slate-500">{user?.college || 'Student Developer'}</p>
                 </div>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                   {user?.track || 'Full Stack'} Track
                 </span>
               </div>
@@ -114,82 +110,80 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
       </header>
 
       {/* Main Canvas */}
-      <main className="px-4 py-6 max-w-2xl mx-auto space-y-6 pt-4 md:pt-6">
+      <main className="px-4 py-6 max-w-3xl mx-auto space-y-6 pt-6 md:pt-8">
         {/* Greeting Section */}
-        <section className="space-y-1">
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#191c1e] tracking-tight">
-            Good evening, <br className="sm:hidden" />
+        <section className="space-y-2">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-[#191c1e] tracking-tight leading-tight">
+            Good evening, <br className="md:hidden" />
             <span className="text-[#4c5b71]">{userName}</span>
           </h1>
-          <p className="text-sm sm:text-base text-slate-500 font-medium">
+          <p className="text-base sm:text-lg text-[#54615d]">
             Ready to crush your goals today?
           </p>
         </section>
 
         {/* Hero Streak Module */}
-        <section className="clay-card-deep p-5 sm:p-6 flex items-center justify-between relative overflow-hidden">
+        <section className="clay-card p-6 flex items-center justify-between relative overflow-hidden">
           {/* Decorative soft background circle */}
-          <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-100 rounded-full blur-2xl opacity-60 pointer-events-none" />
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#d3e4fe] rounded-full blur-2xl opacity-50 pointer-events-none" />
 
           <div className="flex items-center gap-4 z-10">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#f8f9fb] flex items-center justify-center shadow-inner border border-slate-200/80">
-              <Flame className="w-8 h-8 sm:w-9 sm:h-9 text-amber-500 fill-amber-500 drop-shadow-md" />
+            <div className="w-16 h-16 rounded-full bg-[#eceef0] flex items-center justify-center shadow-[inset_4px_4px_8px_#d8dadc,inset_-4px_-4px_8px_#ffffff]">
+              <Flame className="w-9 h-9 text-[#64748b] fill-[#64748b] drop-shadow-[0_0_12px_rgba(100,116,139,0.6)]" />
             </div>
-
             <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#191c1e]">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#191c1e]">
                 {streakDays} Day
               </h2>
-              <p className="font-mono-code text-[11px] font-bold text-[#4c5b71] tracking-widest uppercase">
+              <p className="font-mono-code text-xs font-semibold text-[#4c5b71] tracking-widest uppercase">
                 Active Streak
               </p>
             </div>
           </div>
 
           <div className="z-10 hidden sm:block">
-            <div className="px-4 py-2 rounded-full bg-[#64748b] text-white font-mono-code text-xs font-bold shadow-md">
-              🔥 On Fire!
+            <div className="px-4 py-2 rounded-full bg-[#64748b] text-white font-mono-code text-xs font-bold shadow-[0_0_15px_rgba(100,116,139,0.3)]">
+              On Fire!
             </div>
           </div>
         </section>
 
-        {/* Today's Mission Section */}
-        <section className="clay-card-deep p-6 sm:p-8 flex flex-col items-center text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center shadow-xs">
-            <Flag className="w-6 h-6 text-amber-800" />
+        {/* Mission Section */}
+        <section className="clay-card p-6 sm:p-8 flex flex-col items-center text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-[#ffddb6] flex items-center justify-center shadow-[2px_2px_4px_#d8dadc,-2px_-2px_4px_#ffffff]">
+            <Flag className="w-6 h-6 text-[#2a1801]" />
           </div>
 
           <div className="space-y-1.5">
             <h3 className="text-xl sm:text-2xl font-extrabold text-[#191c1e]">
               Today's Mission: Day {currentDay}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-              Complete your advanced full-stack module and push your proof-of-work commit to maintain your streak.
+            <p className="text-sm sm:text-base text-[#54615d] max-w-md mx-auto leading-relaxed">
+              Complete your advanced pronunciation module to maintain your streak.
             </p>
           </div>
 
           <button
             onClick={() => onNavigate('/')}
-            className="clay-btn-primary bg-[#4c5b71] text-white font-bold py-3.5 px-8 rounded-full w-full sm:w-auto text-sm cursor-pointer shadow-md inline-flex items-center justify-center gap-2 group"
+            className="clay-button bg-[#64748b] hover:bg-[#4c5b71] text-white font-mono-code text-sm sm:text-base font-bold py-3.5 px-10 sm:px-16 rounded-full w-full sm:w-auto mt-2 cursor-pointer transition-all"
           >
-            <span>Continue Learning</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            Continue Learning
           </button>
         </section>
 
         {/* Journey Map */}
         <section className="space-y-3">
-          <div className="flex justify-between items-end px-1">
-            <h3 className="text-lg font-extrabold text-[#191c1e]">
+          <div className="flex justify-between items-end px-2">
+            <h3 className="text-xl font-extrabold text-[#191c1e]">
               Your Journey
             </h3>
-            <span className="font-mono-code text-xs font-semibold text-slate-500">
+            <span className="font-mono-code text-sm font-medium text-[#54615d]">
               60 Days
             </span>
           </div>
 
-          <div className="clay-inset p-4 sm:p-5">
-            <div className="grid grid-cols-6 sm:grid-cols-10 gap-2.5 sm:gap-3 justify-items-center">
+          <div className="clay-inset p-5">
+            <div className="grid grid-cols-6 sm:grid-cols-10 gap-3 sm:gap-4 justify-items-center">
               {Array.from({ length: totalDays }, (_, i) => {
                 const dayNum = i + 1;
                 const isDone = dayNum <= streakDays;
@@ -200,22 +194,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                     key={dayNum}
                     title={`Day ${dayNum}: ${isDone ? 'Completed' : isCurrent ? 'Active' : 'Pending'}`}
                     className={`
-                      w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-xs font-mono-code font-bold transition-all relative
+                      w-6 h-6 sm:w-8 sm:h-8 rounded-[0.75rem] flex items-center justify-center transition-all relative
                       ${
                         isDone
-                          ? 'bg-[#d3e4fe] text-[#0b1c30] clay-marker-done'
+                          ? 'bg-[#d3e4fe] clay-marker-done'
                           : isCurrent
-                          ? 'bg-[#64748b] text-white shadow-md animate-pulse ring-2 ring-white'
-                          : 'bg-white text-slate-300 clay-marker-pending'
+                          ? 'bg-[#64748b] shadow-[0_0_12px_rgba(100,116,139,0.6)] animate-pulse ring-2 ring-white'
+                          : 'bg-[#f8f9fb] clay-marker-pending'
                       }
                     `}
                   >
-                    {isDone ? (
-                      <Check className="w-4 h-4 stroke-[3] text-[#4c5b71]" />
-                    ) : isCurrent ? (
-                      <span className="w-2 h-2 rounded-full bg-amber-300" />
-                    ) : (
-                      <span className="text-[10px] opacity-60">{dayNum}</span>
+                    {isDone && (
+                      <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#4c5b71] stroke-[2.5]" />
                     )}
                   </div>
                 );
@@ -224,31 +214,31 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           </div>
         </section>
 
-        {/* Achievements / Recent Badges */}
+        {/* Recent Badges / Achievements */}
         <section className="space-y-3">
-          <h3 className="text-lg font-extrabold text-[#191c1e] px-1">
+          <h3 className="text-xl font-extrabold text-[#191c1e] px-2">
             Recent Badges
           </h3>
 
-          <div className="flex flex-wrap gap-2.5">
-            <div className="clay-pill px-3.5 py-2 flex items-center gap-2">
-              <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+          <div className="flex flex-wrap gap-3">
+            <div className="clay-pill px-4 py-2 flex items-center gap-2">
+              <Star className="w-4 h-4 text-[#6f5636] fill-[#6f5636]" />
               <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
                 Perfect Week
               </span>
             </div>
 
-            <div className="clay-pill px-3.5 py-2 flex items-center gap-2">
+            <div className="clay-pill px-4 py-2 flex items-center gap-2">
               <Zap className="w-4 h-4 text-[#4c5b71] fill-[#4c5b71]" />
               <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
                 Speed Learner
               </span>
             </div>
 
-            <div className="clay-pill px-3.5 py-2 flex items-center gap-2 opacity-80">
-              <Lock className="w-4 h-4 text-slate-400" />
-              <span className="font-mono-code text-xs font-semibold text-slate-500">
-                Code Artisan
+            <div className="clay-pill px-4 py-2 flex items-center gap-2 opacity-80">
+              <Lock className="w-4 h-4 text-[#74777d]" />
+              <span className="font-mono-code text-xs font-semibold text-[#54615d]">
+                Grammar Guru
               </span>
             </div>
           </div>
@@ -256,57 +246,57 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
       </main>
 
       {/* Bottom Navigation Bar (Mobile Only) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#f8f9fb]/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2 flex justify-around items-center md:hidden shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#eceef0] border-t border-slate-200/80 px-4 py-3 flex justify-around items-center md:hidden shadow-lg rounded-t-2xl pb-safe">
         {/* Home */}
         <button
           onClick={() => setActiveTab('home')}
-          className={`flex flex-col items-center justify-center px-4 py-1.5 rounded-full transition-all cursor-pointer ${
+          className={`flex flex-col items-center justify-center transition-all cursor-pointer ${
             activeTab === 'home'
-              ? 'bg-[#4c5b71] text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-[#4c5b71] text-white rounded-full px-4 py-2 shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),0_4px_8px_rgba(76,91,113,0.3)]'
+              : 'text-[#54615d] px-4 py-2 hover:text-[#4c5b71]'
           }`}
         >
-          <Home className="w-5 h-5" />
-          <span className="text-[10px] font-semibold mt-0.5">Home</span>
+          <Home className="w-5 h-5 mb-0.5" />
+          <span className="text-[11px] font-medium font-mono-code">Home</span>
         </button>
 
         {/* Challenge */}
         <button
           onClick={() => setActiveTab('challenge')}
-          className={`flex flex-col items-center justify-center px-4 py-1.5 rounded-full transition-all cursor-pointer ${
+          className={`flex flex-col items-center justify-center transition-all cursor-pointer ${
             activeTab === 'challenge'
-              ? 'bg-[#4c5b71] text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-[#4c5b71] text-white rounded-full px-4 py-2 shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),0_4px_8px_rgba(76,91,113,0.3)]'
+              : 'text-[#54615d] px-4 py-2 hover:text-[#4c5b71]'
           }`}
         >
-          <Rocket className="w-5 h-5" />
-          <span className="text-[10px] font-semibold mt-0.5">Challenge</span>
+          <Rocket className="w-5 h-5 mb-0.5" />
+          <span className="text-[11px] font-medium font-mono-code">Challenge</span>
         </button>
 
         {/* Progress */}
         <button
           onClick={() => setActiveTab('progress')}
-          className={`flex flex-col items-center justify-center px-4 py-1.5 rounded-full transition-all cursor-pointer ${
+          className={`flex flex-col items-center justify-center transition-all cursor-pointer ${
             activeTab === 'progress'
-              ? 'bg-[#4c5b71] text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-[#4c5b71] text-white rounded-full px-4 py-2 shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),0_4px_8px_rgba(76,91,113,0.3)]'
+              : 'text-[#54615d] px-4 py-2 hover:text-[#4c5b71]'
           }`}
         >
-          <BarChart2 className="w-5 h-5" />
-          <span className="text-[10px] font-semibold mt-0.5">Progress</span>
+          <BarChart2 className="w-5 h-5 mb-0.5" />
+          <span className="text-[11px] font-medium font-mono-code">Progress</span>
         </button>
 
         {/* Profile */}
         <button
           onClick={() => setActiveTab('profile')}
-          className={`flex flex-col items-center justify-center px-4 py-1.5 rounded-full transition-all cursor-pointer ${
+          className={`flex flex-col items-center justify-center transition-all cursor-pointer ${
             activeTab === 'profile'
-              ? 'bg-[#4c5b71] text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-[#4c5b71] text-white rounded-full px-4 py-2 shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),0_4px_8px_rgba(76,91,113,0.3)]'
+              : 'text-[#54615d] px-4 py-2 hover:text-[#4c5b71]'
           }`}
         >
-          <UserIcon className="w-5 h-5" />
-          <span className="text-[10px] font-semibold mt-0.5">Profile</span>
+          <UserIcon className="w-5 h-5 mb-0.5" />
+          <span className="text-[11px] font-medium font-mono-code">Profile</span>
         </button>
       </nav>
     </div>

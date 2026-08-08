@@ -14,41 +14,49 @@
 }
 
 /* Soft Claymorphic & Tactile Card Shadows matching reference design */
+.clay-card {
+  box-shadow: 8px 8px 16px #d8dadc, -8px -8px 16px #ffffff, inset 2px 2px 4px rgba(255, 255, 255, 0.8);
+  border-radius: 2rem;
+  background-color: #ffffff;
+}
+
 .clay-card-deep {
   background-color: #ffffff;
-  border-radius: 1.5rem;
-  box-shadow: 
-    0 12px 30px -8px rgba(100, 116, 139, 0.08),
-    0 4px 12px -2px rgba(100, 116, 139, 0.04),
-    inset 0 1px 2px rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 2rem;
+  box-shadow: 8px 8px 16px #d8dadc, -8px -8px 16px #ffffff, inset 2px 2px 4px rgba(255, 255, 255, 0.8);
 }
 
 .clay-card-shallow {
   background-color: #ffffff;
-  border-radius: 1.25rem;
-  box-shadow: 
-    0 8px 20px -6px rgba(100, 116, 139, 0.06),
-    0 2px 6px -1px rgba(100, 116, 139, 0.03),
-    inset 0 1px 2px rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.7);
+  border-radius: 1.5rem;
+  box-shadow: 6px 6px 12px #d8dadc, -6px -6px 12px #ffffff, inset 1px 1px 3px rgba(255, 255, 255, 0.8);
 }
 
 .clay-inset {
-  box-shadow: inset 4px 4px 10px #d8dadc, inset -4px -4px 10px #ffffff;
-  border-radius: 1.25rem;
+  box-shadow: inset 6px 6px 12px #d8dadc, inset -6px -6px 12px #ffffff;
+  border-radius: 2rem;
   background-color: #f8f9fb;
 }
 
 .clay-pill {
-  box-shadow: 2px 2px 6px #d8dadc, -2px -2px 6px #ffffff, inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+  box-shadow: 4px 4px 8px #d8dadc, -4px -4px 8px #ffffff, inset 1px 1px 2px rgba(255, 255, 255, 0.8);
   border: 1px solid #c4c6cd;
   border-radius: 9999px;
   background-color: #ffffff;
 }
 
+.clay-button {
+  box-shadow: 4px 4px 10px rgba(100, 116, 139, 0.3), -4px -4px 10px rgba(255, 255, 255, 0.9), inset 2px 2px 4px rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.clay-button:active {
+  box-shadow: inset 4px 4px 10px rgba(76, 91, 113, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.4);
+  transform: scale(0.98);
+}
+
 .clay-marker-done {
-  box-shadow: inset 2px 2px 4px rgba(76, 91, 113, 0.15), inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+  box-shadow: inset 2px 2px 4px rgba(76, 91, 113, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.8);
 }
 
 .clay-marker-pending {
@@ -56,27 +64,20 @@
 }
 
 .clay-btn-primary {
-  background-color: #4c5b71;
+  background-color: #64748b;
   color: #ffffff;
-  box-shadow: 
-    0 6px 16px -2px rgba(76, 91, 113, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 4px 4px 10px rgba(100, 116, 139, 0.3), -4px -4px 10px rgba(255, 255, 255, 0.9), inset 2px 2px 4px rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
 }
 
 .clay-btn-primary:hover {
-  background-color: #3f4c5f;
+  background-color: #4c5b71;
   transform: translateY(-1px);
-  box-shadow: 
-    0 8px 20px -2px rgba(76, 91, 113, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 
 .clay-btn-primary:active {
-  transform: translateY(1px);
-  box-shadow: 
-    0 2px 8px -1px rgba(76, 91, 113, 0.3),
-    inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: inset 4px 4px 10px rgba(76, 91, 113, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.4);
+  transform: scale(0.98);
 }
 
 /* Custom scrollbar hiding for clean app experience */
