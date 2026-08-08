@@ -57,8 +57,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
 
     setTimeout(() => {
       setIsLoading(false);
+      const raw = signInEmail.split('@')[0] || 'Nitish';
+      const alphaOnly = raw.replace(/[0-9_.-]/g, '');
+      const finalName = alphaOnly.length > 0
+        ? alphaOnly.charAt(0).toUpperCase() + alphaOnly.slice(1).toLowerCase()
+        : 'Nitish';
       const mockUser: UserProfile = {
-        name: signInEmail.split('@')[0] || 'Student',
+        name: finalName,
         email: signInEmail,
         streak: 11,
         isAuthenticated: true,

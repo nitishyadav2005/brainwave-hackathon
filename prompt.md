@@ -173,3 +173,24 @@ Key Requirements:
 - Mobile 390px optimization, no horizontal overflow, 16px padding, 44px touch targets.
 ```
 
+---
+
+## 9. Final Dashboard Correction Prompt
+
+```text
+FINAL DASHBOARD CORRECTION — DO NOT REDESIGN
+
+Modifying ONLY `/dashboard`.
+
+Key Corrections:
+1. Removed development state switcher pill control from visible UI.
+2. Formatted display name to "Nitish" (no raw email prefixes/usernames like nitishyadav5098).
+3. Journey progress updated to:
+   12 / 60 DAYS
+   20% COMPLETE
+   Progress bar set to 20%.
+   Grid legend remains Completed (11), Active (Day 12), Upcoming.
+4. Preserved 6-column grid, 11-day streak card, Today's Mission card (Day 12), Recent Badges, and fixed bottom navigation.
+5. Optimized vertical spacing for 390px mobile viewport without horizontal overflow.
+```
+

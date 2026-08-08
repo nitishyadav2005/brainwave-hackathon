@@ -24,26 +24,32 @@ interface DashboardPageProps {
 export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, onLogout }) => {
   const journeyRef = useRef<HTMLDivElement>(null);
 
-  // Demo mode state to easily preview First Day, Missed Yesterday, and Standard Day 12
-  const [demoState, setDemoState] = useState<'standard' | 'firstDay' | 'missedYesterday'>(() => {
-    if (user?.currentDay === 1 && user?.streak === 0) return 'firstDay';
-    if (user?.missedYesterday) return 'missedYesterday';
-    return 'standard';
-  });
+  // Derived variables based on current user (ensuring clean display name "Nitish")
+  const rawName = user?.name || 'Nitish';
+  const name = (() => {
+    if (!rawName) return 'Nitish';
+    if (rawName.includes('@') || /^[a-z]+[0-9]+/i.test(rawName) || /^\d+$/.test(rawName)) {
+      const alphaOnly = rawName.split('@')[0].replace(/[0-9_.-]/g, '');
+      if (alphaOnly.length > 0) {
+        return alphaOnly.charAt(0).toUpperCase() + alphaOnly.slice(1).toLowerCase();
+      }
+      return 'Nitish';
+    }
+    return rawName;
+  })();
 
-  // Derived variables based on current user / demo mode
-  const name = user?.name || 'Nitish';
   const college = user?.college || 'ABES Engineering College';
   const track = user?.track || 'Full Stack Development';
 
-  const isFirstDay = demoState === 'firstDay';
-  const isMissedYesterday = demoState === 'missedYesterday';
+  const isFirstDay = user?.currentDay === 1 && user?.streak === 0;
+  const isMissedYesterday = !!user?.missedYesterday;
 
   const currentDay = isFirstDay ? 1 : (user?.currentDay ?? 12);
   const streakDays = isFirstDay ? 0 : (user?.streak ?? 11);
-  const completedDays = isFirstDay ? 0 : (currentDay > 1 ? currentDay - 1 : 0);
+  const completedDays = isFirstDay ? 0 : (currentDay > 1 ? currentDay - 1 : 0); // 11
   const totalDays = 60;
-  const completionPercentage = isFirstDay ? 0 : Math.round((completedDays / totalDays) * 100);
+  const progressDay = isFirstDay ? 0 : currentDay; // 12
+  const completionPercentage = isFirstDay ? 0 : Math.round((progressDay / totalDays) * 100); // 20%
 
   const scrollToJourney = () => {
     if (journeyRef.current) {
@@ -76,43 +82,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
       {/* MAIN CONTAINER (Centered 390px layout) */}
       <main className="max-w-md mx-auto px-4 pt-5 space-y-5">
         
-        {/* SUBTLE STATE SWITCHER FOR REVIEW (Pill Controls) */}
-        <div className="bg-slate-200/60 p-1 rounded-xl flex items-center justify-between text-[11px] font-mono-code">
-          <span className="text-slate-500 font-bold px-2">State:</span>
-          <div className="flex gap-1">
-            <button
-              onClick={() => setDemoState('standard')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                demoState === 'standard'
-                  ? 'bg-white text-[#4c5b71] shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Day 12
-            </button>
-            <button
-              onClick={() => setDemoState('firstDay')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                demoState === 'firstDay'
-                  ? 'bg-white text-[#4c5b71] shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              First Day
-            </button>
-            <button
-              onClick={() => setDemoState('missedYesterday')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                demoState === 'missedYesterday'
-                  ? 'bg-white text-[#4c5b71] shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Missed Yesterday
-            </button>
-          </div>
-        </div>
-
         {/* 2. GREETING */}
         <section className="space-y-0.5">
           <h1 className="text-[28px] leading-tight font-extrabold text-[#191c1e] tracking-tight">
@@ -235,7 +204,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             </h3>
             <div className="text-right">
               <span className="font-mono-code text-xs font-bold text-[#191c1e]">
-                {completedDays} / 60 DAYS
+                {progressDay} / 60 DAYS
               </span>
               <span className="font-mono-code text-[11px] font-bold text-[#4c5b71] ml-2">
                 {completionPercentage}% COMPLETE
