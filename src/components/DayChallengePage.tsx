@@ -1,5 +1,20 @@
-import React from 'react';
-import { ArrowLeft, Code2, Github, ExternalLink, Flame, CheckCircle2, Award } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Github,
+  Linkedin,
+  Loader2,
+  ArrowRight,
+  Home,
+  Rocket,
+  BarChart2,
+  User as UserIcon,
+  Flame,
+  CheckCircle2
+} from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface DayChallengePageProps {
@@ -8,101 +23,621 @@ interface DayChallengePageProps {
   onNavigate: (route: string) => void;
 }
 
-export const DayChallengePage: React.FC<DayChallengePageProps> = ({ dayNumber, user, onNavigate }) => {
-  const isCompleted = dayNumber < 12;
+export const DayChallengePage: React.FC<DayChallengePageProps> = ({
+  dayNumber = 12,
+  user,
+  onNavigate,
+}) => {
+  // Check if Day 12 was previously completed in localStorage
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(() => {
+    return localStorage.getItem(`abtalks_day_${dayNumber}_completed`) === 'true';
+  });
+
+  // Finish Line Checklist state
+  const [checklist, setChecklist] = useState({
+    chooseApi: false,
+    buildUi: false,
+    connectData: false,
+    pushGithub: false,
+  });
+
+  // Expandable Guidance Accordion state
+  const [openGuidance, setOpenGuidance] = useState<number | null>(null);
+
+  // GitHub Proof inputs & status
+  const [githubRepo, setGithubRepo] = useState('');
+  const [githubCommit, setGithubCommit] = useState('');
+  const [githubVerifying, setGithubVerifying] = useState(false);
+  const [githubVerified, setGithubVerified] = useState(false);
+  const [githubError, setGithubError] = useState('');
+
+  // LinkedIn Proof inputs & status
+  const [linkedinPost, setLinkedinPost] = useState('');
+  const [linkedinVerifying, setLinkedinVerifying] = useState(false);
+  const [linkedinVerified, setLinkedinVerified] = useState(false);
+  const [linkedinError, setLinkedinError] = useState('');
+
+  // Check if all checklist items are checked
+  const allChecklistDone =
+    checklist.chooseApi &&
+    checklist.buildUi &&
+    checklist.connectData &&
+    checklist.pushGithub;
+
+  // Check if submit button should be enabled
+  const canSubmit =
+    allChecklistDone &&
+    githubRepo.trim().length > 0 &&
+    githubCommit.trim().length > 0 &&
+    linkedinPost.trim().length > 0 &&
+    githubVerified &&
+    linkedinVerified;
+
+  // Toggle checklist item
+  const toggleChecklist = (key: keyof typeof checklist) => {
+    setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Toggle guidance accordion
+  const toggleGuidance = (index: number) => {
+    setOpenGuidance((prev) => (prev === index ? null : index));
+  };
+
+  // Verify GitHub
+  const handleVerifyGithub = () => {
+    setGithubError('');
+    if (!githubRepo.trim()) {
+      setGithubError('Required: Please enter your repository URL');
+      return;
+    }
+    if (!githubCommit.trim()) {
+      setGithubError('Required: Please enter your commit URL');
+      return;
+    }
+    if (!githubRepo.includes('github.com')) {
+      setGithubError("Couldn't verify this link. Check the URL and try again.");
+      return;
+    }
+
+    setGithubVerifying(true);
+    setTimeout(() => {
+      setGithubVerifying(false);
+      setGithubVerified(true);
+    }, 800);
+  };
+
+  // Verify LinkedIn
+  const handleVerifyLinkedin = () => {
+    setLinkedinError('');
+    if (!linkedinPost.trim()) {
+      setLinkedinError('Required: Please enter your post URL');
+      return;
+    }
+    if (!linkedinPost.includes('linkedin.com')) {
+      setLinkedinError("Couldn't verify this link. Check the URL and try again.");
+      return;
+    }
+
+    setLinkedinVerifying(true);
+    setTimeout(() => {
+      setLinkedinVerifying(false);
+      setLinkedinVerified(true);
+    }, 800);
+  };
+
+  // Submit Day 12
+  const handleSubmitDay = () => {
+    if (!canSubmit) return;
+    localStorage.setItem(`abtalks_day_${dayNumber}_completed`, 'true');
+    setIsSubmitted(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-20 selection:bg-[#4c5b71]/15">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full h-14 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4">
+    <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-32 selection:bg-[#4c5b71]/15">
+      {/* 1. TOP HEADER */}
+      <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4">
         <div className="max-w-md mx-auto h-full flex items-center justify-between">
           <button
             onClick={() => onNavigate('/dashboard')}
-            className="flex items-center gap-1.5 text-xs font-bold text-[#4c5b71] hover:text-[#38485d] transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-xs font-bold text-[#4c5b71] hover:text-[#38485d] transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Dashboard</span>
+            <span>Back</span>
           </button>
 
-          <span className="font-mono-code text-xs font-extrabold text-[#4c5b71] uppercase tracking-wider">
-            DAY {dayNumber} OF 60
+          <span className="font-mono-code text-xs font-extrabold text-[#4c5b71] tracking-wider uppercase">
+            DAY {dayNumber} / 60
+          </span>
+
+          <span className="font-mono-code text-[11px] font-bold text-slate-500">
+            20% COMPLETE
           </span>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 pt-6 space-y-5">
-        {/* Challenge Header Card */}
-        <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold uppercase font-mono-code">
-              Medium Challenge
-            </span>
-            <span className="text-xs font-mono-code font-bold text-slate-500">
-              Est. 60–90 min
-            </span>
-          </div>
-
-          <h1 className="text-xl font-bold text-[#191c1e] leading-snug">
-            {dayNumber === 12
-              ? 'Build something useful with an API'
-              : `Day ${dayNumber} Coding Challenge`}
-          </h1>
-
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Connect to a public REST or GraphQL API (e.g. GitHub API, Weather API, or Gemini API), format the data cleanly, and build an interactive UI widget or mini tool that provides value to users.
-          </p>
-
-          <div className="flex items-center gap-2 pt-2 text-xs font-mono-code text-slate-600">
-            <span className="px-2 py-1 bg-slate-100 rounded text-[11px]">#FullStack</span>
-            <span className="px-2 py-1 bg-slate-100 rounded text-[11px]">#APIs</span>
-            <span className="px-2 py-1 bg-slate-100 rounded text-[11px]">#ProofOfWork</span>
-          </div>
-        </div>
-
-        {/* Requirements */}
-        <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200 space-y-3">
-          <h2 className="text-sm font-bold text-[#191c1e] flex items-center gap-2">
-            <Code2 className="w-4 h-4 text-[#4c5b71]" />
-            <span>Submission Guidelines</span>
-          </h2>
-
-          <ul className="space-y-2 text-xs text-slate-600 list-disc list-inside leading-relaxed">
-            <li>Create a new repository or directory for Day {dayNumber}.</li>
-            <li>Commit your working code to GitHub with message: <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono-code">"Day {dayNumber}: API integration"</code>.</li>
-            <li>Post a screenshot or short video demo on LinkedIn tagging #ABTalks #60DaysOfCode.</li>
-          </ul>
-        </div>
-
-        {/* Proof Submission Action */}
-        <div className="bg-[#4c5b71] text-white rounded-2xl p-5 shadow-md space-y-3">
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-amber-400 fill-amber-400" />
-            <h3 className="text-sm font-bold">Lock in Day {dayNumber} Proof</h3>
-          </div>
-
-          <p className="text-xs text-slate-200 leading-relaxed">
-            Once submitted on GitHub and LinkedIn, mark this day as complete to maintain your 11-day active streak!
-          </p>
-
-          {isCompleted ? (
-            <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-xl p-3 flex items-center gap-2 text-emerald-200 text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Day {dayNumber} verified & locked in!</span>
+      {/* MAIN CONTAINER */}
+      <main className="max-w-md mx-auto px-4 pt-5 space-y-5">
+        
+        {/* SUCCESS STATE DISPLAY (IF SUBMITTED) */}
+        {isSubmitted ? (
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-emerald-200 text-center space-y-5 animate-in fade-in duration-300">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-inner">
+              <CheckCircle2 className="w-10 h-10 stroke-[2.2]" />
             </div>
-          ) : (
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-extrabold text-[#191c1e]">
+                Day {dayNumber} complete 🎉
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-xs mx-auto">
+                You showed up again. Your 12-day streak is alive.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-1 text-xs font-mono-code font-bold text-emerald-800">
+              <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 flex items-center gap-1">
+                GitHub <Check className="w-3.5 h-3.5 stroke-[3]" />
+              </span>
+              <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 flex items-center gap-1">
+                LinkedIn <Check className="w-3.5 h-3.5 stroke-[3]" />
+              </span>
+            </div>
+
             <button
-              onClick={() => {
-                alert(`Day ${dayNumber} marked as submitted! Great job maintaining your streak.`);
-                onNavigate('/dashboard');
-              }}
-              className="w-full bg-white text-[#4c5b71] hover:bg-slate-50 font-bold text-xs py-3 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              onClick={() => onNavigate('/dashboard')}
+              className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
-              <Github className="w-4 h-4" />
-              <span>Submit Proof of Work</span>
+              <span>Continue to Day 13 →</span>
             </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <>
+            {/* 2. MISSION HEADER */}
+            <section className="bg-white rounded-2xl p-5 shadow-sm border-2 border-[#4c5b71]/20 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono-code text-[11px] font-bold text-[#4c5b71] tracking-wider uppercase">
+                  TODAY'S MISSION
+                </span>
+                <span className="bg-[#4c5b71] text-white font-mono-code text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                  DAY {dayNumber}
+                </span>
+              </div>
+
+              <h1 className="text-xl font-extrabold text-[#191c1e] leading-snug">
+                “Build something useful with an API”
+              </h1>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Build a small practical project using a public API and turn the data into something people can use.
+              </p>
+
+              {/* Metadata Badges */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 font-mono-code text-[10px] font-semibold text-slate-600">
+                <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md border border-slate-200/60 uppercase">
+                  FULL STACK
+                </span>
+                <span className="bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md border border-amber-200/60 uppercase">
+                  MEDIUM
+                </span>
+                <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md border border-slate-200/60 uppercase">
+                  60–90 MIN
+                </span>
+              </div>
+            </section>
+
+            {/* 3. MISSION BRIEF: "Your challenge" */}
+            <section className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 space-y-3">
+              <h2 className="text-base font-bold text-[#191c1e]">
+                Your challenge
+              </h2>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Build a small working project that consumes a public API.
+              </p>
+
+              <div className="space-y-1.5 text-xs text-slate-700 font-medium pl-1">
+                <div className="flex items-start gap-2">
+                  <span className="text-[#4c5b71] font-bold">•</span>
+                  <span>Fetch data from an API</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[#4c5b71] font-bold">•</span>
+                  <span>Display the data clearly</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[#4c5b71] font-bold">•</span>
+                  <span>Have a usable interface</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[#4c5b71] font-bold">•</span>
+                  <span>Be pushed to GitHub</span>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. TODAY'S FINISH LINE */}
+            <section className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 space-y-3">
+              <h2 className="text-base font-bold text-[#191c1e]">
+                Today's finish line
+              </h2>
+
+              <div className="space-y-2">
+                {[
+                  { key: 'chooseApi', label: 'Choose a public API' },
+                  { key: 'buildUi', label: 'Build the interface' },
+                  { key: 'connectData', label: 'Connect and display API data' },
+                  { key: 'pushGithub', label: 'Push your project to GitHub' },
+                ].map((item) => {
+                  const isChecked = checklist[item.key as keyof typeof checklist];
+
+                  return (
+                    <button
+                      key={item.key}
+                      onClick={() => toggleChecklist(item.key as keyof typeof checklist)}
+                      className={`
+                        w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer
+                        ${
+                          isChecked
+                            ? 'bg-slate-50 border-emerald-300 text-slate-800'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                        }
+                      `}
+                    >
+                      <div
+                        className={`
+                          w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors
+                          ${
+                            isChecked
+                              ? 'bg-emerald-600 border-emerald-600 text-white'
+                              : 'border-slate-300 bg-white'
+                          }
+                        `}
+                      >
+                        {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      </div>
+
+                      <span
+                        className={`text-xs font-semibold ${
+                          isChecked ? 'line-through opacity-70' : ''
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* 5. BUILD GUIDANCE */}
+            <section className="space-y-2.5">
+              <h2 className="text-base font-bold text-[#191c1e]">
+                Build guidance
+              </h2>
+
+              <div className="space-y-2">
+                {[
+                  {
+                    step: '01',
+                    title: 'Explore',
+                    desc: 'Find an API and understand its response.',
+                    detail: 'Search public APIs (e.g. OpenWeather, GitHub REST API, JSONPlaceholder). Test the response using cURL or browser devtools to check data fields.',
+                  },
+                  {
+                    step: '02',
+                    title: 'Build',
+                    desc: 'Create a simple interface for the data.',
+                    detail: 'Set up React components with Tailwind CSS. Design input search boxes or display cards that present the payload cleanly.',
+                  },
+                  {
+                    step: '03',
+                    title: 'Connect',
+                    desc: 'Fetch and display the API data.',
+                    detail: 'Use fetch() or axios inside useEffect/async functions. Handle loading states, error states, and empty response states.',
+                  },
+                  {
+                    step: '04',
+                    title: 'Ship',
+                    desc: 'Push the finished project to GitHub.',
+                    detail: 'Commit your project with a clean README containing screenshots, features, and setup instructions. Push to GitHub.',
+                  },
+                ].map((g, idx) => {
+                  const isOpen = openGuidance === idx;
+
+                  return (
+                    <div
+                      key={g.step}
+                      className="bg-white border border-slate-200/80 rounded-xl overflow-hidden transition-all shadow-2xs"
+                    >
+                      <button
+                        onClick={() => toggleGuidance(idx)}
+                        className="w-full p-3.5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50/80 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono-code text-xs font-bold text-[#4c5b71] bg-slate-100 px-2 py-0.5 rounded">
+                            {g.step}
+                          </span>
+                          <div>
+                            <p className="text-xs font-bold text-[#191c1e]">{g.title}</p>
+                            <p className="text-[11px] text-slate-500 font-medium">{g.desc}</p>
+                          </div>
+                        </div>
+
+                        {isOpen ? (
+                          <ChevronUp className="w-4 h-4 text-slate-400" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        )}
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-3.5 pb-3.5 pt-1 text-xs text-slate-600 bg-slate-50/50 border-t border-slate-100 leading-relaxed">
+                          {g.detail}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* 6. PROOF OF WORK */}
+            <section className="space-y-3 pt-1">
+              <div>
+                <h2 className="text-base font-bold text-[#191c1e]">
+                  Submit your proof
+                </h2>
+                <p className="text-xs text-slate-500 font-medium">
+                  Show that you actually shipped today's work.
+                </p>
+              </div>
+
+              {/* GITHUB CARD */}
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono-code text-xs font-bold text-[#191c1e] flex items-center gap-1.5">
+                    <Github className="w-4 h-4 text-[#191c1e]" />
+                    <span>GITHUB</span>
+                  </span>
+
+                  {githubVerified && (
+                    <span className="text-[11px] font-mono-code font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                      <Check className="w-3 h-3 stroke-[3]" /> Verified
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                      Repository URL
+                    </label>
+                    <input
+                      type="url"
+                      value={githubRepo}
+                      onChange={(e) => {
+                        setGithubRepo(e.target.value);
+                        setGithubVerified(false);
+                      }}
+                      placeholder="https://github.com/username/project"
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono-code focus:outline-hidden focus:border-[#4c5b71] bg-slate-50/50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                      Commit URL
+                    </label>
+                    <input
+                      type="url"
+                      value={githubCommit}
+                      onChange={(e) => {
+                        setGithubCommit(e.target.value);
+                        setGithubVerified(false);
+                      }}
+                      placeholder="https://github.com/username/project/commit/..."
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono-code focus:outline-hidden focus:border-[#4c5b71] bg-slate-50/50"
+                    />
+                  </div>
+                </div>
+
+                {githubError && (
+                  <p className="text-[11px] font-medium text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-200">
+                    {githubError}
+                  </p>
+                )}
+
+                {githubVerified ? (
+                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-2">
+                    <Check className="w-4 h-4 stroke-[3] text-emerald-600" />
+                    <span>✓ GitHub proof verified</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleVerifyGithub}
+                    disabled={githubVerifying}
+                    className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {githubVerifying ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Verifying GitHub...</span>
+                      </>
+                    ) : (
+                      <span>Verify GitHub</span>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* LINKEDIN CARD */}
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono-code text-xs font-bold text-[#191c1e] flex items-center gap-1.5">
+                    <Linkedin className="w-4 h-4 text-[#0077b5]" />
+                    <span>LINKEDIN</span>
+                  </span>
+
+                  {linkedinVerified && (
+                    <span className="text-[11px] font-mono-code font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                      <Check className="w-3 h-3 stroke-[3]" /> Verified
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    Post URL
+                  </label>
+                  <input
+                    type="url"
+                    value={linkedinPost}
+                    onChange={(e) => {
+                      setLinkedinPost(e.target.value);
+                      setLinkedinVerified(false);
+                    }}
+                    placeholder="https://linkedin.com/posts/..."
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-mono-code focus:outline-hidden focus:border-[#4c5b71] bg-slate-50/50"
+                  />
+                </div>
+
+                {linkedinError && (
+                  <p className="text-[11px] font-medium text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-200">
+                    {linkedinError}
+                  </p>
+                )}
+
+                {linkedinVerified ? (
+                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-2">
+                    <Check className="w-4 h-4 stroke-[3] text-emerald-600" />
+                    <span>✓ LinkedIn proof verified</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleVerifyLinkedin}
+                    disabled={linkedinVerifying}
+                    className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {linkedinVerifying ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Verifying LinkedIn...</span>
+                      </>
+                    ) : (
+                      <span>Verify LinkedIn</span>
+                    )}
+                  </button>
+                )}
+              </div>
+            </section>
+
+            {/* 7. PROOF PREVIEW */}
+            <section className="space-y-2 pt-1">
+              <div>
+                <h2 className="text-base font-bold text-[#191c1e]">
+                  Proof Preview
+                </h2>
+                <p className="text-xs text-slate-500 font-medium">
+                  This is how Day 12 will appear on your public journey.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-2xl p-4 border-2 border-dashed border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono-code text-[11px] font-extrabold text-[#4c5b71]">
+                    DAY {dayNumber}
+                  </span>
+                  <span className="font-mono-code text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                    <Flame className="w-3 h-3 fill-amber-500 text-amber-500" />
+                    12 DAY STREAK
+                  </span>
+                </div>
+
+                <p className="text-xs font-bold text-[#191c1e]">
+                  Build something useful with an API
+                </p>
+
+                <div className="flex items-center gap-3 pt-1 text-[11px] font-mono-code font-bold">
+                  <span className={githubVerified ? 'text-emerald-700 flex items-center gap-1' : 'text-slate-400'}>
+                    {githubVerified ? '✓' : '○'} GitHub
+                  </span>
+                  <span className={linkedinVerified ? 'text-emerald-700 flex items-center gap-1' : 'text-slate-400'}>
+                    {linkedinVerified ? '✓' : '○'} LinkedIn
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            {/* 8. SUBMIT DAY BUTTON */}
+            <section className="pt-2">
+              <button
+                type="button"
+                disabled={!canSubmit}
+                onClick={handleSubmitDay}
+                className={`
+                  w-full font-bold text-sm py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer
+                  ${
+                    canSubmit
+                      ? 'bg-[#4c5b71] hover:bg-[#38485d] text-white cursor-pointer active:scale-[0.99]'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                  }
+                `}
+              >
+                <span>Submit Day 12 →</span>
+              </button>
+
+              {!canSubmit && (
+                <p className="text-[11px] text-center text-slate-400 font-medium mt-2">
+                  Complete all finish-line items & verify both links to enable submission.
+                </p>
+              )}
+            </section>
+          </>
+        )}
+
       </main>
+
+      {/* 9. FIXED BOTTOM NAVIGATION */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-lg">
+        {/* HOME */}
+        <button
+          onClick={() => onNavigate('/dashboard')}
+          className="flex flex-col items-center justify-center py-1 px-3 text-slate-400 hover:text-[#4c5b71] transition-colors cursor-pointer"
+        >
+          <Home className="w-5 h-5 stroke-[2]" />
+          <span className="text-[10px] font-semibold mt-0.5">Home</span>
+        </button>
+
+        {/* CHALLENGE (ACTIVE) */}
+        <button
+          onClick={() => onNavigate(`/day/${dayNumber}`)}
+          className="flex flex-col items-center justify-center py-1 px-3 text-[#4c5b71] cursor-pointer"
+        >
+          <Rocket className="w-5 h-5 stroke-[2.2]" />
+          <span className="text-[10px] font-bold mt-0.5">Challenge</span>
+        </button>
+
+        {/* PROGRESS */}
+        <button
+          onClick={() => onNavigate('/dashboard')}
+          className="flex flex-col items-center justify-center py-1 px-3 text-slate-400 hover:text-[#4c5b71] transition-colors cursor-pointer"
+        >
+          <BarChart2 className="w-5 h-5 stroke-[2]" />
+          <span className="text-[10px] font-semibold mt-0.5">Progress</span>
+        </button>
+
+        {/* PROFILE */}
+        <button
+          onClick={() => onNavigate('/profile')}
+          className="flex flex-col items-center justify-center py-1 px-3 text-slate-400 hover:text-[#4c5b71] transition-colors cursor-pointer"
+        >
+          <UserIcon className="w-5 h-5 stroke-[2]" />
+          <span className="text-[10px] font-semibold mt-0.5">Profile</span>
+        </button>
+      </nav>
     </div>
   );
 };
