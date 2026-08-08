@@ -8,6 +8,8 @@ import { Footer } from './components/Footer';
 import { TrackModal } from './components/TrackModal';
 import { AuthPage } from './components/AuthPage';
 import { DashboardPage } from './components/DashboardPage';
+import { DayChallengePage } from './components/DayChallengePage';
+import { ProfilePage } from './components/ProfilePage';
 import { UserProfile } from './types';
 
 export default function App() {
@@ -82,6 +84,30 @@ export default function App() {
         user={user}
         onNavigate={handleNavigate}
         onLogout={handleLogout}
+      />
+    );
+  }
+
+  // Route: /profile
+  if (currentRoute === '/profile') {
+    return (
+      <ProfilePage
+        user={user}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // Route: /day/:id
+  if (currentRoute.startsWith('/day/')) {
+    const dayStr = currentRoute.replace('/day/', '');
+    const dayNum = parseInt(dayStr, 10) || 12;
+    return (
+      <DayChallengePage
+        dayNumber={dayNum}
+        user={user}
+        onNavigate={handleNavigate}
       />
     );
   }
