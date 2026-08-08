@@ -194,3 +194,23 @@ Key Corrections:
 5. Optimized vertical spacing for 390px mobile viewport without horizontal overflow.
 ```
 
+---
+
+## 10. Day 12 Initial State Fix Prompt
+
+```text
+FIX DAY 12 INITIAL STATE — DEFAULT INCOMPLETE
+
+1. Day 12 (`/day/12`) now defaults to INCOMPLETE state (`isSubmitted = false`).
+2. Cleaned stale testing keys in localStorage (`abtalks_day12_completed`, `abtalks_day_12_completed`) unless explicitly submitted with `abtalks_day12_submitted`.
+3. Challenge page presents full mission flow: TODAY'S MISSION, Your challenge, Today's finish line, Build guidance, Submit your proof (GitHub + LinkedIn verification), Proof preview, and Submit Day 12 → CTA.
+4. Upon successful submission:
+   - Sets `abtalks_day12_submitted = true` and `abtalks_day12_completed = true`.
+   - Updates progress: `completedDays = 12`, `streak = 12`, `currentDay = 13`.
+   - Displays success screen: "Day 12 complete 🎉", streak alive message, verified badges, and "Continue to Day 13 →" CTA.
+5. Dashboard state behavior:
+   - Before Day 12 submission: Current Day: 12, Streak: 11, Completed: 11, Progress: 12 / 60 (20%), Day 12 active in grid.
+   - After Day 12 submission: Current Day: 13, Streak: 12, Completed: 12, Progress: 13 / 60 (22%), Day 12 completed with checkmark in grid.
+6. Internal helper `resetMockState()` added to clear mock challenge state on demand (`window.resetMockState()`).
+```
+

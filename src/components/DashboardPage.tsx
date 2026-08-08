@@ -44,12 +44,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const isFirstDay = user?.currentDay === 1 && user?.streak === 0;
   const isMissedYesterday = !!user?.missedYesterday;
 
-  const currentDay = isFirstDay ? 1 : (user?.currentDay ?? 12);
-  const streakDays = isFirstDay ? 0 : (user?.streak ?? 11);
-  const completedDays = isFirstDay ? 0 : (currentDay > 1 ? currentDay - 1 : 0); // 11
+  const isDay12Submitted =
+    typeof window !== 'undefined' &&
+    (localStorage.getItem('abtalks_day12_submitted') === 'true' ||
+      localStorage.getItem('abtalks_day12_completed') === 'true');
+
+  const currentDay = isFirstDay ? 1 : isDay12Submitted ? 13 : 12;
+  const streakDays = isFirstDay ? 0 : isDay12Submitted ? 12 : 11;
+  const completedDays = isFirstDay ? 0 : isDay12Submitted ? 12 : 11;
   const totalDays = 60;
-  const progressDay = isFirstDay ? 0 : currentDay; // 12
-  const completionPercentage = isFirstDay ? 0 : Math.round((progressDay / totalDays) * 100); // 20%
+  const progressDay = isFirstDay ? 0 : currentDay; // 12 before submit, 13 after submit
+  const completionPercentage = isFirstDay ? 0 : Math.round((progressDay / totalDays) * 100); // 20% or 22%
 
   const scrollToJourney = () => {
     if (journeyRef.current) {
@@ -158,11 +163,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             <h2 className="text-xl font-bold text-[#191c1e] leading-snug">
               {isFirstDay
                 ? 'Welcome to ABTalks & First Commit'
+                : currentDay === 13
+                ? 'Deploy your project to production'
                 : 'Build something useful with an API'}
             </h2>
             <p className="text-xs text-slate-600 leading-relaxed">
               {isFirstDay
                 ? 'Set up your local workspace, create your first GitHub repository, and push a working README to kick off your 60-day challenge.'
+                : currentDay === 13
+                ? 'Package your full-stack app and deploy it to production so anyone on the web can try it.'
                 : 'Build a small practical project using a public API and turn the data into something people can use.'}
             </p>
           </div>

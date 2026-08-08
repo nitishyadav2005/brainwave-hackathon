@@ -22,17 +22,48 @@ interface DayChallengePageProps {
   dayNumber: number;
   user: UserProfile | null;
   onNavigate: (route: string) => void;
+  onUpdateUser?: (updatedProfile: UserProfile) => void;
+}
+
+export const resetMockChallengeState = () => {
+  localStorage.removeItem('abtalks_day12_completed');
+  localStorage.removeItem('abtalks_day_12_completed');
+  localStorage.removeItem('abtalks_day12_submitted');
+  localStorage.removeItem('abtalks_day12_submitted_at');
+  localStorage.removeItem('abtalks_progress');
+  localStorage.removeItem('abtalks_proof');
+  localStorage.removeItem('abtalks_checklist');
+  for (let i = 1; i <= 60; i++) {
+    localStorage.removeItem(`abtalks_day${i}_completed`);
+    localStorage.removeItem(`abtalks_day_${i}_completed`);
+    localStorage.removeItem(`abtalks_day${i}_submitted`);
+  }
+};
+
+if (typeof window !== 'undefined') {
+  (window as any).resetMockState = resetMockChallengeState;
 }
 
 export const DayChallengePage: React.FC<DayChallengePageProps> = ({
   dayNumber = 12,
   user,
   onNavigate,
+  onUpdateUser,
 }) => {
-  // Check if completed in localStorage
-  const storageKey = `abtalks_day_${dayNumber}_completed`;
+  // Check if completed in localStorage (Default MUST be false unless explicitly submitted in current flow)
+  const submitFlagKey = `abtalks_day${dayNumber}_submitted`;
+  const storageKey = `abtalks_day${dayNumber}_completed`;
+  const legacyStorageKey = `abtalks_day_${dayNumber}_completed`;
+
   const [isSubmitted, setIsSubmitted] = useState<boolean>(() => {
-    return localStorage.getItem(storageKey) === 'true';
+    const hasBeenSubmitted = localStorage.getItem(submitFlagKey) === 'true';
+    if (!hasBeenSubmitted) {
+      // Clean stale legacy values from previous test sessions
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(legacyStorageKey);
+      return false;
+    }
+    return true;
   });
 
   // Finish Line Checklist state
@@ -125,6 +156,32 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
   const handleSubmitDay = () => {
     if (!canSubmit) return;
     localStorage.setItem(storageKey, 'true');
+    localStorage.setItem(legacyStorageKey, 'true');
+    localStorage.setItem(submitFlagKey, 'true');
+    localStorage.setItem(`abtalks_day${dayNumber}_submitted_at`, new Date().toISOString());
+
+    try {
+      const savedUser = localStorage.getItem('abtalks_user');
+      const parsedUser = savedUser ? JSON.parse(savedUser) : {};
+      const updatedUser: UserProfile = {
+        name: parsedUser.name || 'Nitish',
+        email: parsedUser.email || 'nitish@example.com',
+        college: parsedUser.college || 'ABES Engineering College',
+        track: parsedUser.track || 'Full Stack Development',
+        currentDay: dayNumber + 1, // 13
+        streak: dayNumber, // 12
+        completedDays: dayNumber, // 12
+        day12Completed: true,
+        isAuthenticated: true,
+      };
+      localStorage.setItem('abtalks_user', JSON.stringify(updatedUser));
+      if (onUpdateUser) {
+        onUpdateUser(updatedUser);
+      }
+    } catch {
+      // ignore JSON errors
+    }
+
     setIsSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

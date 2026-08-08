@@ -22,7 +22,18 @@ export default function App() {
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem('abtalks_user');
-      return saved ? JSON.parse(saved) : null;
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (parsed) {
+        const hasSubmittedDay12 = localStorage.getItem('abtalks_day12_submitted') === 'true';
+        if (!hasSubmittedDay12) {
+          parsed.day12Completed = false;
+          parsed.currentDay = 12;
+          parsed.streak = 11;
+          parsed.completedDays = 11;
+          localStorage.setItem('abtalks_user', JSON.stringify(parsed));
+        }
+      }
+      return parsed;
     } catch {
       return null;
     }
@@ -125,6 +136,7 @@ export default function App() {
         dayNumber={dayNum}
         user={user}
         onNavigate={handleNavigate}
+        onUpdateUser={handleUpdateUser}
       />
     );
   }

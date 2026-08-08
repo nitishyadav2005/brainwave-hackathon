@@ -23,6 +23,7 @@ export interface UserProfile {
   longestStreak?: number;
   currentDay?: number;
   completedDays?: number;
+  day12Completed?: boolean;
   missedYesterday?: boolean;
   isAuthenticated: boolean;
 }
