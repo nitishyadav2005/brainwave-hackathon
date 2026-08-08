@@ -46,6 +46,19 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
   // Share button state
   const [shareCopied, setShareCopied] = useState(false);
 
+  // Auto-print effect when requested from preview modal
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isUnlocked) {
+      if (sessionStorage.getItem('abtalks_auto_print') === 'true') {
+        sessionStorage.removeItem('abtalks_auto_print');
+        const timer = setTimeout(() => {
+          window.print();
+        }, 400);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isUnlocked]);
+
   const studentName = user?.name || 'Nitish';
   const studentCollege = user?.college || 'ABES Engineering College';
   const studentTrack = user?.track || 'Full Stack Development';
