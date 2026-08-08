@@ -143,37 +143,33 @@ prompt wali file har 1 chat ke bad update karte rehna
 
 ---
 
-## 7. Landing Page Content & UX Polish Pass Prompt
+## 8. ABTalks Landing Page — Final Implementation Prompt
 
 ```text
-We are doing a FINAL CONTENT AND UX POLISH pass on the existing ABTalks Landing Page.
+ABTALKS LANDING PAGE — FINAL IMPLEMENTATION
 
 IMPORTANT:
-The current visual design is approved.
-DO NOT redesign the page.
+You are modifying ONLY the Landing Page route: `/`
 
-1. REMOVE UNVERIFIED SOCIAL PROOF
-Replace "1,240+ college students currently building" with "Built for Indian college students".
+Do NOT modify: `/auth`, `/dashboard`, `/day/12`, `/progress`, `/profile`
 
-2. MAKE THE 60-DAY JOURNEY MORE PROMINENT
-After hero section and before "How ABTalks works", add compact section:
-VISUALIZING MOMENTUM
-"Your 60-day journey."
-60-cell grid (Days 1–11 completed, Day 12 current, Days 13–60 upcoming).
-Caption: "Every square is a day you showed up."
+Target Landing Page Structure:
+1. Header
+2. Hero
+3. 60-Day Journey
+4. How ABTalks Works
+5. Proof of Work
+6. Final CTA
+7. Footer
 
-3. IMPROVE PROOF-OF-WORK COPY
-Title: "Your work should be visible."
-Subtitle: "Build every day. Submit the proof. Let your progress speak for itself."
-GitHub: Title "Show what you built." Text: "Keep your code, commits and progress visible."
-LinkedIn: Title "Show that you shipped it." Text: "Share your build and make your consistency visible."
-
-4. HEADER
-Functional hamburger menu dropdown with: How it works, Sign in, Start the challenge.
-
-5. HERO & FINAL CTA
-Navigates to /auth with clean CTA buttons ("Start Your Challenge →", "Start Day 01 →").
-
-6. MOBILE CHECK
-Zero horizontal scrolling at 390px viewport, proper touch targets and padding.
+Key Requirements:
+- Header: Hamburger menu with "How it works", "Proof of work", "Sign in", "Start the challenge".
+- Hero: "THE 60-DAY CHALLENGE", "60 days. One project. Every day.", "Commit to daily creative work. Track your progress, prove your growth, and turn consistent coding into visible proof of work.", CTA "Start Your Challenge →" -> `/auth`, "Built for Indian college students".
+- 60-Day Journey: "VISUALIZING MOMENTUM", "Your 60-day journey.", 60-cell grid (6x10), Days 1-11 completed, Day 12 current, Days 13-60 upcoming, "Every square is a day you showed up.", subtle progress bar (12/60, 20%).
+- How ABTalks Works: "SIMPLE DAILY SYSTEM", "How ABTalks works", Steps 01 Choose your track, 02 Build every day, 03 Submit your proof.
+- Proof of Work: "DUAL SIGNAL VERIFICATION", "Your work should be visible.", "Build every day. Submit the proof. Let your progress speak for itself.", GitHub ("Show what you built.", "Keep your code, commits and progress visible."), LinkedIn ("Show that you shipped it.", "Share your build and make your consistency visible.").
+- Final CTA: "Your 60 days start with Day 01.", "One small build today. A stronger portfolio 60 days from now.", "Start Day 01 →" -> `/auth`, "Free for Indian college students • No credit card required".
+- Footer: ABTalks, "Build. Ship. Prove.", Links: How it works, Challenge (`/auth`), Sign in (`/auth`).
+- Mobile 390px optimization, no horizontal overflow, 16px padding, 44px touch targets.
 ```
+

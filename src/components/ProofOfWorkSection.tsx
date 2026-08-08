@@ -3,7 +3,7 @@ import { Github, Linkedin, ExternalLink, ShieldCheck } from 'lucide-react';
 
 export const ProofOfWorkSection: React.FC = () => {
   return (
-    <section className="px-4 py-6 max-w-md md:max-w-2xl mx-auto">
+    <section id="proof-of-work" className="px-4 py-6 max-w-md md:max-w-2xl mx-auto">
       <div className="text-center mb-6">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-2">
           <ShieldCheck className="w-3.5 h-3.5 text-[#4c5b71]" />
@@ -20,7 +20,7 @@ export const ProofOfWorkSection: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        {/* GitHub Card */}
+        {/* CARD 1 — GITHUB */}
         <div className="clay-card-shallow p-5 flex flex-col justify-between hover:border-slate-300 transition-all">
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -46,7 +46,7 @@ export const ProofOfWorkSection: React.FC = () => {
           </div>
         </div>
 
-        {/* LinkedIn Card */}
+        {/* CARD 2 — LINKEDIN */}
         <div className="clay-card-shallow p-5 flex flex-col justify-between hover:border-slate-300 transition-all">
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -67,7 +67,7 @@ export const ProofOfWorkSection: React.FC = () => {
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono-code text-[#4c5b71]">
-            <span>Public accountability tag</span>
+            <span>Public accountability</span>
             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
           </div>
         </div>
