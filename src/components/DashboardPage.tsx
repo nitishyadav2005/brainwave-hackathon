@@ -191,6 +191,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           </button>
         </section>
 
+        {/* 4.5 COMPACT LATEST PROOF ENTRY (ONLY AFTER DAY 12 IS COMPLETED) */}
+        {(completedDays >= 12 ||
+          (typeof window !== 'undefined' &&
+            (localStorage.getItem('abtalks_day12_submitted') === 'true' ||
+              localStorage.getItem('abtalks_day12_completed') === 'true'))) && (
+          <section className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between gap-3 animate-in fade-in duration-300">
+            <div className="space-y-0.5">
+              <span className="font-mono-code text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                Your latest proof
+              </span>
+              <h3 className="text-sm font-extrabold text-[#191c1e]">
+                Day 12 · API Project
+              </h3>
+            </div>
+            <button
+              onClick={() => onNavigate('/day/12')}
+              className="bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-2.5 px-3.5 rounded-xl transition-all cursor-pointer whitespace-nowrap min-h-[44px] flex items-center justify-center active:scale-[0.99]"
+            >
+              View Proof →
+            </button>
+          </section>
+        )}
+
         {/* 5. JOURNEY */}
         <section ref={journeyRef} className="space-y-3 pt-2">
           {/* Section Header */}
