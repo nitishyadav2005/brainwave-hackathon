@@ -52,7 +52,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-32 selection:bg-[#4c5b71]/15">
+    <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-36 selection:bg-[#4c5b71]/15 overflow-x-hidden">
       {/* 1. TOP HEADER (Minimal 56px tall, profile avatar on right) */}
       <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4">
         <div className="max-w-md mx-auto h-full flex items-center justify-between">
@@ -357,7 +357,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
       </main>
 
       {/* 7. FIXED BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2 flex justify-around items-center max-w-md mx-auto shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">
         {/* HOME (ACTIVE) */}
         <button
           onClick={() => onNavigate('/dashboard')}
