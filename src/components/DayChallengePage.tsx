@@ -259,27 +259,9 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
               </div>
             </div>
 
-            {/* ABTALKS PROOF CARD */}
-            <div className="pt-2 border-t border-slate-100">
-              <ProofCard
-                dayNumber={dayNumber}
-                missionTitle={
-                  dayNumber === 1
-                    ? 'Welcome to ABTalks & First Commit'
-                    : dayNumber === 13
-                    ? 'Deploy your project to production'
-                    : 'Build something useful with an API'
-                }
-                user={user}
-                completionPercentage={completionPercentage}
-                githubRepo={githubRepo}
-                linkedinPost={linkedinPost}
-              />
-            </div>
-
             <button
               onClick={() => onNavigate('/dashboard')}
-              className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-4"
+              className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-3"
             >
               <span>Continue to Day {dayNumber + 1} →</span>
             </button>

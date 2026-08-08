@@ -11,6 +11,7 @@ import { DashboardPage } from './components/DashboardPage';
 import { DayChallengePage } from './components/DayChallengePage';
 import { ProfilePage } from './components/ProfilePage';
 import { ProgressPage } from './components/ProgressPage';
+import { ReportPage } from './components/ReportPage';
 import { UserProfile } from './types';
 import { formatFirstName } from './utils/nameUtils';
 import { getEffectiveUserProgress } from './utils/userProgress';
@@ -136,6 +137,24 @@ export default function App() {
         user={user}
         onNavigate={handleNavigate}
         onUpdateUser={handleUpdateUser}
+      />
+    );
+  }
+
+  // Route: /reports/:id
+  if (currentRoute.startsWith('/reports/')) {
+    const reportStr = currentRoute.replace('/reports/', '');
+    let reportId = 1;
+    if (reportStr === 'final' || reportStr === '6') {
+      reportId = 6;
+    } else {
+      reportId = parseInt(reportStr, 10) || 1;
+    }
+    return (
+      <ReportPage
+        reportId={reportId}
+        user={user}
+        onNavigate={handleNavigate}
       />
     );
   }

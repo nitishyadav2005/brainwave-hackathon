@@ -14,8 +14,10 @@ import {
   ArrowRight,
   RefreshCw,
   Sparkles,
-  Calendar
+  Calendar,
+  FileText
 } from 'lucide-react';
+import { REPORT_LIST } from '../data/reportsData';
 
 interface DashboardPageProps {
   user: UserProfile | null;
@@ -191,29 +193,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           </button>
         </section>
 
-        {/* 4.5 COMPACT LATEST PROOF ENTRY (ONLY AFTER DAY 12 IS COMPLETED) */}
-        {(completedDays >= 12 ||
-          (typeof window !== 'undefined' &&
-            (localStorage.getItem('abtalks_day12_submitted') === 'true' ||
-              localStorage.getItem('abtalks_day12_completed') === 'true'))) && (
-          <section className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between gap-3 animate-in fade-in duration-300">
-            <div className="space-y-0.5">
-              <span className="font-mono-code text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                Your latest proof
-              </span>
-              <h3 className="text-sm font-extrabold text-[#191c1e]">
-                Day 12 · API Project
-              </h3>
-            </div>
-            <button
-              onClick={() => onNavigate('/day/12')}
-              className="bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-2.5 px-3.5 rounded-xl transition-all cursor-pointer whitespace-nowrap min-h-[44px] flex items-center justify-center active:scale-[0.99]"
-            >
-              View Proof →
-            </button>
-          </section>
-        )}
-
         {/* 5. JOURNEY */}
         <section ref={journeyRef} className="space-y-3 pt-2">
           {/* Section Header */}
@@ -339,6 +318,88 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                 30 Day Streak
               </span>
             </div>
+          </div>
+        </section>
+
+        {/* 7. YOUR PROJECT REPORTS */}
+        <section className="space-y-3 pt-2">
+          <div className="space-y-0.5">
+            <h3 className="text-base font-bold text-[#191c1e]">
+              YOUR PROJECT REPORTS
+            </h3>
+            <p className="text-xs text-slate-600 font-medium leading-relaxed">
+              “Every 10 days, turn your progress into something you can keep.”
+            </p>
+          </div>
+
+          <div className="space-y-2.5">
+            {REPORT_LIST.map((report) => {
+              const isUnlocked = completedDays >= report.requiredCompletedDays;
+              return (
+                <div
+                  key={report.id}
+                  className={`bg-white rounded-2xl p-4 border transition-all ${
+                    isUnlocked
+                      ? 'border-slate-200/90 shadow-xs'
+                      : 'border-slate-200/60 bg-slate-50/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono-code text-xs font-extrabold text-[#191c1e] flex items-center gap-1">
+                          {isUnlocked ? (
+                            <FileText className="w-3.5 h-3.5 text-[#4c5b71]" />
+                          ) : (
+                            <Lock className="w-3.5 h-3.5 text-slate-400" />
+                          )}
+                          Progress Report 0{report.id}
+                        </span>
+                        {isUnlocked ? (
+                          <span className="font-mono-code text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                            <Check className="w-3 h-3 stroke-[3]" /> Completed
+                          </span>
+                        ) : (
+                          <span className="font-mono-code text-[10px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                            LOCKED
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="font-mono-code text-[11px] font-semibold text-slate-500">
+                        {report.periodLabel}
+                      </p>
+
+                      {isUnlocked ? (
+                        <p className="text-xs font-mono-code text-slate-600 pt-0.5">
+                          10 Builds · 10 GitHub Commits · 10 LinkedIn Posts
+                        </p>
+                      ) : (
+                        <p className="text-xs text-slate-500 font-medium pt-0.5">
+                          “Complete Day {report.requiredCompletedDays} to unlock”
+                        </p>
+                      )}
+                    </div>
+
+                    {isUnlocked ? (
+                      <button
+                        onClick={() => onNavigate(`/reports/${report.id}`)}
+                        className="bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-2.5 px-3.5 rounded-xl transition-all cursor-pointer whitespace-nowrap min-h-[44px] flex items-center justify-center active:scale-[0.99] shadow-xs"
+                      >
+                        View Report →
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="bg-slate-100 text-slate-400 font-bold text-xs py-2.5 px-3 rounded-xl cursor-not-allowed whitespace-nowrap min-h-[44px] flex items-center justify-center border border-slate-200/80"
+                      >
+                        Locked 🔒
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
