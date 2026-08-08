@@ -14,8 +14,8 @@ export const ProofOfWorkSection: React.FC = () => {
         <h2 className="text-2xl font-bold text-[#1e293b] tracking-tight">
           Your work should be visible.
         </h2>
-        <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
-          No ghost portfolios. Build real repos and build in public every day.
+        <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+          Build every day. Submit the proof. Let your progress speak for itself.
         </p>
       </div>
 
@@ -36,7 +36,7 @@ export const ProofOfWorkSection: React.FC = () => {
               “Show what you built.”
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Submit daily repository commits, pull requests, and working source code.
+              Keep your code, commits and progress visible.
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export const ProofOfWorkSection: React.FC = () => {
               “Show that you shipped it.”
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Post a 60-second video demo or key technical takeaways for recruiters and peers.
+              Share your build and make your consistency visible.
             </p>
           </div>
 

@@ -44,7 +44,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartChallenge }) =>
           </button>
 
           <p className="text-[11px] font-mono-code text-slate-400 mt-1">
-            ⚡ 1,240+ college students currently building
+            ⚡ Built for Indian college students
           </p>
         </div>
       </div>

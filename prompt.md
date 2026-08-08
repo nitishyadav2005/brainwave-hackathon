@@ -140,3 +140,40 @@ abhi tak hamari jitni bhi chats hue hau usse prompt.md file me dal de
 ```text
 prompt wali file har 1 chat ke bad update karte rehna
 ```
+
+---
+
+## 7. Landing Page Content & UX Polish Pass Prompt
+
+```text
+We are doing a FINAL CONTENT AND UX POLISH pass on the existing ABTalks Landing Page.
+
+IMPORTANT:
+The current visual design is approved.
+DO NOT redesign the page.
+
+1. REMOVE UNVERIFIED SOCIAL PROOF
+Replace "1,240+ college students currently building" with "Built for Indian college students".
+
+2. MAKE THE 60-DAY JOURNEY MORE PROMINENT
+After hero section and before "How ABTalks works", add compact section:
+VISUALIZING MOMENTUM
+"Your 60-day journey."
+60-cell grid (Days 1–11 completed, Day 12 current, Days 13–60 upcoming).
+Caption: "Every square is a day you showed up."
+
+3. IMPROVE PROOF-OF-WORK COPY
+Title: "Your work should be visible."
+Subtitle: "Build every day. Submit the proof. Let your progress speak for itself."
+GitHub: Title "Show what you built." Text: "Keep your code, commits and progress visible."
+LinkedIn: Title "Show that you shipped it." Text: "Share your build and make your consistency visible."
+
+4. HEADER
+Functional hamburger menu dropdown with: How it works, Sign in, Start the challenge.
+
+5. HERO & FINAL CTA
+Navigates to /auth with clean CTA buttons ("Start Your Challenge →", "Start Day 01 →").
+
+6. MOBILE CHECK
+Zero horizontal scrolling at 390px viewport, proper touch targets and padding.
+```
