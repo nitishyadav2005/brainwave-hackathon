@@ -187,6 +187,12 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Calculate dynamic completion count & percentage based on dayNumber & completion state
+  const currentCompletedCount = isSubmitted
+    ? Math.max(user?.completedDays || 0, dayNumber)
+    : Math.max(user?.completedDays || 0, dayNumber);
+  const completionPercentage = Math.round((dayNumber / 60) * 100);
+
   return (
     <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-36 selection:bg-[#4c5b71]/15 overflow-x-hidden">
       {/* 1. TOP HEADER */}
@@ -205,7 +211,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
           </span>
 
           <span className="font-mono-code text-[11px] font-bold text-slate-500">
-            20% COMPLETE
+            {completionPercentage}% COMPLETE
           </span>
         </div>
       </header>
@@ -228,7 +234,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                 Day {dayNumber} complete 🎉
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-xs mx-auto">
-                You showed up again. Your 12-day streak is alive.
+                You showed up again. Your {currentCompletedCount}-day streak is alive.
               </p>
             </div>
 
@@ -247,8 +253,8 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                 View your submission:
               </p>
               <div className="text-xs font-mono-code text-[#4c5b71] space-y-1 truncate">
-                <p className="truncate">✓ {githubRepo || 'https://github.com/nitish/api-project'}</p>
-                <p className="truncate">✓ {linkedinPost || 'https://linkedin.com/posts/nitish-day12'}</p>
+                <p className="truncate">✓ {githubRepo || `https://github.com/nitish/day${dayNumber}-project`}</p>
+                <p className="truncate">✓ {linkedinPost || `https://linkedin.com/posts/nitish-day${dayNumber}`}</p>
               </div>
             </div>
 
@@ -256,7 +262,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
               onClick={() => onNavigate('/dashboard')}
               className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
-              <span>Continue to Day 13 →</span>
+              <span>Continue to Day {dayNumber + 1} →</span>
             </button>
           </div>
         ) : (
@@ -616,7 +622,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                   Proof Preview
                 </h2>
                 <p className="text-xs text-slate-500 font-medium">
-                  This is how Day 12 will appear on your public journey.
+                  This is how Day {dayNumber} will appear on your public journey.
                 </p>
               </div>
 
@@ -627,7 +633,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                   </span>
                   <span className="font-mono-code text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
                     <Flame className="w-3 h-3 fill-amber-500 text-amber-500" />
-                    12 DAY STREAK
+                    {dayNumber} DAY STREAK
                   </span>
                 </div>
 

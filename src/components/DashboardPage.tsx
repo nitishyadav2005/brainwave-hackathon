@@ -34,17 +34,33 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const isFirstDay = user?.currentDay === 1 && user?.streak === 0;
   const isMissedYesterday = !!user?.missedYesterday;
 
-  const isDay12Submitted =
-    typeof window !== 'undefined' &&
-    (localStorage.getItem('abtalks_day12_submitted') === 'true' ||
-      localStorage.getItem('abtalks_day12_completed') === 'true');
+  let highestSubmittedDay = 0;
+  if (typeof window !== 'undefined') {
+    for (let i = 1; i <= 60; i++) {
+      if (
+        localStorage.getItem(`abtalks_day${i}_submitted`) === 'true' ||
+        localStorage.getItem(`abtalks_day${i}_completed`) === 'true'
+      ) {
+        highestSubmittedDay = Math.max(highestSubmittedDay, i);
+      }
+    }
+  }
 
-  const currentDay = isFirstDay ? 1 : isDay12Submitted ? 13 : 12;
-  const streakDays = isFirstDay ? 0 : isDay12Submitted ? 12 : 11;
-  const completedDays = isFirstDay ? 0 : isDay12Submitted ? 12 : 11;
+  const userBaseDay = user?.currentDay || 12;
+  const userCompletedBase = user?.completedDays || 11;
+
+  const currentDay = isFirstDay
+    ? 1
+    : Math.max(userBaseDay, highestSubmittedDay > 0 ? highestSubmittedDay + 1 : 12);
+  const streakDays = isFirstDay
+    ? 0
+    : Math.max(userCompletedBase, highestSubmittedDay > 0 ? highestSubmittedDay : 11);
+  const completedDays = streakDays;
   const totalDays = 60;
-  const progressDay = isFirstDay ? 0 : currentDay; // 12 before submit, 13 after submit
-  const completionPercentage = isFirstDay ? 0 : Math.round((progressDay / totalDays) * 100); // 20% or 22%
+  const progressDay = isFirstDay ? 0 : currentDay;
+  const completionPercentage = isFirstDay
+    ? 0
+    : Math.round((progressDay / totalDays) * 100);
 
   const scrollToJourney = () => {
     if (journeyRef.current) {

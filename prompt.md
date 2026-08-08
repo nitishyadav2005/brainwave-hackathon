@@ -224,3 +224,19 @@ REMOVE JOURNEY MOMENTUM SECTION FROM LANDING PAGE
 1. Removed the `<JourneyMomentumSection />` (Visualizing Momentum - 60-day journey grid) from the landing page (`/`).
 ```
 
+---
+
+## 12. Dynamic Progress Percentage Calculation
+
+```text
+DYNAMIC PROGRESS PERCENTAGE FOR DAY CHALLENGE HEADER
+
+1. Replaced hardcoded `20% COMPLETE` in `DayChallengePage.tsx` top header with dynamic percentage calculation (`{completionPercentage}% COMPLETE`).
+2. `completionPercentage` dynamically evaluates based on current day out of 60: `Math.round((dayNumber / 60) * 100)`.
+   - Day 12 / 60: 20% COMPLETE (`12 / 60 = 20%`)
+   - Day 13 / 60: 22% COMPLETE (`13 / 60 = 21.66% -> 22%`)
+   - Day 14 / 60: 23% COMPLETE (`14 / 60 = 23.33% -> 23%`)
+3. Dynamically updated streak text, proof preview labels, and DashboardPage progress calculation scanner.
+```
+
+
