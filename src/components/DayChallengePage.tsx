@@ -17,6 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { formatFirstName } from '../utils/nameUtils';
 
 interface DayChallengePageProps {
   dayNumber: number;
@@ -164,7 +165,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
       const savedUser = localStorage.getItem('abtalks_user');
       const parsedUser = savedUser ? JSON.parse(savedUser) : {};
       const updatedUser: UserProfile = {
-        name: parsedUser.name || 'Nitish',
+        name: formatFirstName(parsedUser.name),
         email: parsedUser.email || 'nitish@example.com',
         college: parsedUser.college || 'ABES Engineering College',
         track: parsedUser.track || 'Full Stack Development',

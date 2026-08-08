@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
-import { JourneyMomentumSection } from './components/JourneyMomentumSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { ProofOfWorkSection } from './components/ProofOfWorkSection';
 import { FinalCTASection } from './components/FinalCTASection';
@@ -13,6 +12,7 @@ import { DayChallengePage } from './components/DayChallengePage';
 import { ProfilePage } from './components/ProfilePage';
 import { ProgressPage } from './components/ProgressPage';
 import { UserProfile } from './types';
+import { formatFirstName } from './utils/nameUtils';
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
@@ -24,14 +24,15 @@ export default function App() {
       const saved = localStorage.getItem('abtalks_user');
       const parsed = saved ? JSON.parse(saved) : null;
       if (parsed) {
+        parsed.name = formatFirstName(parsed.name);
         const hasSubmittedDay12 = localStorage.getItem('abtalks_day12_submitted') === 'true';
         if (!hasSubmittedDay12) {
           parsed.day12Completed = false;
           parsed.currentDay = 12;
           parsed.streak = 11;
           parsed.completedDays = 11;
-          localStorage.setItem('abtalks_user', JSON.stringify(parsed));
         }
+        localStorage.setItem('abtalks_user', JSON.stringify(parsed));
       }
       return parsed;
     } catch {
@@ -154,9 +155,6 @@ export default function App() {
       <main className="flex-1 w-full pb-10">
         {/* Hero Viewport */}
         <HeroSection onStartChallenge={handleStartChallengeFromLanding} />
-
-        {/* 60-Day Journey Momentum Visualization */}
-        <JourneyMomentumSection />
 
         {/* How ABTalks Works */}
         <HowItWorksSection />

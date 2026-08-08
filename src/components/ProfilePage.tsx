@@ -18,6 +18,7 @@ import {
   Lock
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { formatFirstName } from '../utils/nameUtils';
 
 interface ProfilePageProps {
   user: UserProfile | null;
@@ -35,7 +36,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [isEditing, setIsEditing] = useState(false);
 
   // Profile Form States
-  const [nameInput, setNameInput] = useState(user?.name || 'Nitish');
+  const [nameInput, setNameInput] = useState(formatFirstName(user?.name));
   const [collegeInput, setCollegeInput] = useState(user?.college || 'ABES Engineering College');
   const [trackInput, setTrackInput] = useState(user?.track || 'Full Stack Development');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
@@ -49,8 +50,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     e.preventDefault();
     if (!nameInput.trim()) return;
 
+    const formattedName = formatFirstName(nameInput);
     const updatedProfile: UserProfile = {
-      name: nameInput.trim(),
+      name: formattedName,
       email: user?.email || `${nameInput.toLowerCase().replace(/\s+/g, '')}@student.edu`,
       college: collegeInput.trim() || 'ABES Engineering College',
       track: trackInput.trim() || 'Full Stack Development',

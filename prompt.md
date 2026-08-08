@@ -214,3 +214,13 @@ FIX DAY 12 INITIAL STATE — DEFAULT INCOMPLETE
 6. Internal helper `resetMockState()` added to clear mock challenge state on demand (`window.resetMockState()`).
 ```
 
+---
+
+## 11. Landing Page Adjustment
+
+```text
+REMOVE JOURNEY MOMENTUM SECTION FROM LANDING PAGE
+
+1. Removed the `<JourneyMomentumSection />` (Visualizing Momentum - 60-day journey grid) from the landing page (`/`).
+```
+

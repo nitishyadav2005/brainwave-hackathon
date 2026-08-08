@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { UserProfile } from '../types';
+import { formatFirstName } from '../utils/nameUtils';
 import {
   Flame,
   Check,
@@ -24,19 +25,8 @@ interface DashboardPageProps {
 export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, onLogout }) => {
   const journeyRef = useRef<HTMLDivElement>(null);
 
-  // Derived variables based on current user (ensuring clean display name "Nitish")
-  const rawName = user?.name || 'Nitish';
-  const name = (() => {
-    if (!rawName) return 'Nitish';
-    if (rawName.includes('@') || /^[a-z]+[0-9]+/i.test(rawName) || /^\d+$/.test(rawName)) {
-      const alphaOnly = rawName.split('@')[0].replace(/[0-9_.-]/g, '');
-      if (alphaOnly.length > 0) {
-        return alphaOnly.charAt(0).toUpperCase() + alphaOnly.slice(1).toLowerCase();
-      }
-      return 'Nitish';
-    }
-    return rawName;
-  })();
+  // Derived variables based on current user (ensuring clean first name "Nitish", no surname)
+  const name = formatFirstName(user?.name);
 
   const college = user?.college || 'ABES Engineering College';
   const track = user?.track || 'Full Stack Development';

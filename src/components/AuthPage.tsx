@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Sparkles, Lock, Mail, User, GraduationCap, Code2, AlertCircle } from 'lucide-react';
 import { AuthMode, UserProfile } from '../types';
+import { formatFirstName } from '../utils/nameUtils';
 
 interface AuthPageProps {
   onNavigate: (route: string) => void;
@@ -57,11 +58,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
 
     setTimeout(() => {
       setIsLoading(false);
-      const raw = signInEmail.split('@')[0] || 'Nitish';
-      const alphaOnly = raw.replace(/[0-9_.-]/g, '');
-      const finalName = alphaOnly.length > 0
-        ? alphaOnly.charAt(0).toUpperCase() + alphaOnly.slice(1).toLowerCase()
-        : 'Nitish';
+      const finalName = formatFirstName(signInEmail);
       const mockUser: UserProfile = {
         name: finalName,
         email: signInEmail,
@@ -113,7 +110,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
       setSuccessOverlay(true);
 
       const mockUser: UserProfile = {
-        name: signUpName.trim(),
+        name: formatFirstName(signUpName.trim()),
         email: signUpEmail.trim(),
         college: signUpCollege.trim(),
         track: selectedTrack,
