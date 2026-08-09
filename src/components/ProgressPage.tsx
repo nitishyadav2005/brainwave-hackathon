@@ -55,7 +55,7 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({ user, onNavigate }) 
                 CHALLENGE PROGRESS
               </p>
               <h1 className="text-2xl font-extrabold text-[#191c1e] mt-0.5">
-                {completedDays} / {totalDays} Days
+                {currentDay} / {totalDays} Days
               </h1>
             </div>
 

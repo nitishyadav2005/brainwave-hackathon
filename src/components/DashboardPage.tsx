@@ -56,10 +56,9 @@ interface DashboardPageProps {
   user: UserProfile | null;
   onNavigate: (route: string) => void;
   onLogout: () => void;
-  onUpdateUser?: (updated: UserProfile) => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, onLogout, onUpdateUser }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, onLogout }) => {
   const journeyRef = useRef<HTMLDivElement>(null);
 
   // Selected report modal state
@@ -160,9 +159,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           parsed.challengeStatus = 'completed';
           parsed.projectCompleted = true;
           localStorage.setItem('abtalks_user', JSON.stringify(parsed));
-          if (onUpdateUser) {
-            onUpdateUser(parsed);
-          }
         }
       } catch (e) {
         console.warn('Error saving completed status to user:', e);
@@ -203,9 +199,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           parsed.graceEndDate = endDateStr;
           parsed.challengeStatus = 'grace_period';
           localStorage.setItem('abtalks_user', JSON.stringify(parsed));
-          if (onUpdateUser) {
-            onUpdateUser(parsed);
-          }
         }
       } catch (e) {
         console.warn('Error saving grace period to user:', e);
@@ -224,7 +217,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
     });
 
     setIsExtensionModalOpen(false);
-    onNavigate('/grace');
+    setShowExtensionActivatedToast(true);
+    setTimeout(() => {
+      setShowExtensionActivatedToast(false);
+    }, 4500);
   };
 
   // Derived variables based on current user (ensuring clean first name "Nitish", no surname)
@@ -240,16 +236,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const streakDays = progress.streakDays;
   const completedDays = progress.completedDays;
   const totalDays = 60;
-  const progressDay = isFirstDay ? 0 : completedDays;
-  const completionPercentage = isFirstDay ? 0 : Math.round((completedDays / 60) * 100);
+  const progressDay = isFirstDay ? 0 : currentDay;
+  const completionPercentage = isFirstDay ? 0 : progress.completionPercentage;
 
-  // Eligible for 5-Day Extension ONLY AFTER completing Day 60 and if grace period option is chosen
+  // Eligible for 5-Day Extension if at/past Day 60, completed < 60 days, and extension not yet used
   const isEligibleForExtension =
-    completedDays >= 60 && !extensionInfo.extensionUsed && !extensionInfo.projectCompleted;
-
-  const canShowCertificate =
-    completedDays >= 60 &&
-    (extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted === true);
+    currentDay >= 60 && completedDays < 60 && !extensionInfo.extensionUsed;
 
   const scrollToJourney = () => {
     if (journeyRef.current) {
@@ -611,29 +603,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
           {/* Primary Full-Width CTA */}
           <button
-            onClick={() => {
-              if (completedDays >= 60) {
-                if (extensionInfo.challengeStatus === 'grace_period') {
-                  onNavigate('/grace');
-                } else if (canShowCertificate) {
-                  setIsCertificateOpen(true);
-                } else {
-                  journeyRef.current?.scrollIntoView({ behavior: 'smooth' });
-                }
-              } else {
-                onNavigate(`/day/${currentDay}`);
-              }
-            }}
+            onClick={() => onNavigate(`/day/${currentDay}`)}
             className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3 px-4 rounded-xl shadow-sm transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer mt-2"
           >
             <span>
-              {completedDays >= 60
-                ? extensionInfo.challengeStatus === 'grace_period'
-                  ? 'Continue Finishing Project →'
-                  : canShowCertificate
-                  ? 'View Completion Certificate →'
-                  : 'View Challenge Completion Options →'
-                : isFirstDay
+              {isFirstDay
                 ? 'Start Day 01 →'
                 : isMissedYesterday
                 ? 'Continue Challenge →'
@@ -759,25 +733,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                   </span>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                  <button
-                    onClick={() => onNavigate('/grace')}
-                    className="flex-1 py-3 px-4 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
-                  >
-                    <span>Continue Finishing →</span>
-                  </button>
-                  <button
-                    onClick={() => setIsGraceCompleteModalOpen(true)}
-                    className="py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
-                  >
-                    <span>Mark Project Complete</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => setIsGraceCompleteModalOpen(true)}
+                  className="w-full py-3 px-4 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
+                >
+                  <span>Mark Project Complete →</span>
+                </button>
               </div>
             )}
 
           {/* CHALLENGE COMPLETED CARD */}
-          {canShowCertificate && (
+          {(extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted) && (
             <div className="bg-emerald-50 border-2 border-emerald-300/90 rounded-2xl p-5 sm:p-6 shadow-xs space-y-3.5 text-center animate-in fade-in">
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center mx-auto text-emerald-700 font-extrabold text-xl shadow-2xs">
                 🎉
@@ -1287,7 +1253,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
       {/* OFFICIAL COMPLETION CERTIFICATE MODAL */}
       <CertificateModal
-        isOpen={isCertificateOpen && canShowCertificate}
+        isOpen={isCertificateOpen}
         onClose={() => setIsCertificateOpen(false)}
         user={user}
       />
