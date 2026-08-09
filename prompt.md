@@ -397,5 +397,68 @@ CONTINUOUS PROMPT LOGGING
    - 60-Day Journey Grid: Preserved strictly as 60 days (no extra days 61-65 added to grid).
 ```
 
+---
+
+## 21. ABTalks Landing Page — Final Product Story & Visual Hierarchy Polish Pass
+
+```text
+ABTALKS LANDING PAGE — FINAL PRODUCT STORY + VISUAL HIERARCHY
+
+1. Hero Section:
+   - Eyebrow: THE 60-DAY CODING CHALLENGE
+   - Main Heading: "60 days. One project. Every day."
+   - Supporting text: "Build something every day, prove your work publicly, and turn 60 days of consistency into a project you can actually show."
+   - CTA: "Start Your Challenge →"
+   - Trust indicator: "Built for Indian college students"
+
+2. Proof of Work Section:
+   - Eyebrow: MAKE YOUR WORK VISIBLE
+   - Heading: "Your progress shouldn't disappear after you close your laptop."
+   - Supporting text: "ABTalks turns daily coding into public proof of work."
+   - GitHub & LinkedIn authentic cards with public proof badges.
+
+3. Built for Real Life Section:
+   - Eyebrow: BUILT FOR REAL LIFE
+   - Heading: "Because college doesn't stop for a coding challenge."
+   - Supporting text: "Miss a day. Need more time. Life happens. ABTalks gives you a little room without losing the structure of the challenge."
+   - Card 1: 3 Streak Savers (Shield icon, visual counter 🛡 3 available, step progression flow).
+   - Card 2: 5-Day Grace (Clock icon, 5-day grace project finishing timeline).
+   - Summary Statement: "60 days to build. A little flexibility to finish. One project you're proud to ship."
+```
+
+---
+
+## 22. Completion Certificate Integration into Landing Page
+
+```text
+ABTALKS LANDING PAGE — ADD COMPLETION CERTIFICATE TO PRODUCT STORY
+
+1. Finish with Proof Section (`CertificateSection`):
+   - Eyebrow: FINISH WITH PROOF
+   - Heading: "60 days of work. One project. A certificate to prove you finished."
+   - Supporting text: "Complete all 60 challenge days and finish your project to earn your ABTalks Completion Certificate."
+2. Certificate Preview Card:
+   - ABTalks Completion Certificate card preview
+   - Displays Name ("XYZ"), Challenge ("60-DAY CODING CHALLENGE"), 60 / 60 DAYS badge, and PROJECT COMPLETED badge.
+3. Certificate Requirement Checklist:
+   - ✓ Complete all 60 challenge days
+   - ✓ Complete your project
+   - ✓ Submit your final project
+   - Button: "Get your Completion Certificate →" (Informational on landing page).
+```
+
+---
+
+## 23. Landing Page Section Removals & Layout Streamlining
+
+```text
+LANDING PAGE STREAMLINING UPON USER FEEDBACK
+
+1. Removed HowItWorksSection ("Build it. Prove it. Repeat.") from landing page.
+2. Removed 5-Day Grace duplicate compatibility box from CertificateSection.
+3. Removed FinalCTASection from bottom of landing page to keep the CertificateSection as the final conversion focal point.
+4. Replaced certificate recipient placeholder name with "XYZ" in CertificateSection.tsx.
+```
+
 
 
