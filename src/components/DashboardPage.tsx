@@ -26,6 +26,31 @@ import {
 } from 'lucide-react';
 import { REPORT_LIST, ReportDef } from '../data/reportsData';
 
+// Custom Streak Saver Icon (Shield + Flame hybrid)
+const StreakSaverIcon = ({ className = "w-3.5 h-3.5 text-[#4c5b71]" }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    aria-hidden="true"
+  >
+    {/* Shield Outer Line */}
+    <path
+      d="M12 2.75C12 2.75 18 4.25 19.5 5.75C19.5 12 16.5 17.5 12 21.25C7.5 17.5 4.5 12 4.5 5.75C6 4.25 12 2.75 12 2.75Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Inner Flame / Spark */}
+    <path
+      d="M12 7.25C12 7.25 14.25 9.5 14.25 11.75C14.25 13.25 13.25 14.5 12 14.5C10.75 14.5 9.75 13.25 9.75 11.75C9.75 10 11 8.5 12 7.25Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 interface DashboardPageProps {
   user: UserProfile | null;
   onNavigate: (route: string) => void;
@@ -267,7 +292,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                 <div className="bg-slate-50/90 rounded-xl p-3 border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-1.5">
-                      <Shield className="w-4 h-4 text-[#4c5b71]" />
+                      <StreakSaverIcon className="w-4 h-4 text-[#4c5b71] shrink-0" />
                       <span className="font-bold text-xs text-[#191c1e]">Streak Saver</span>
                     </div>
                     <p className="text-[11px] text-slate-500 font-medium">
@@ -339,11 +364,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
                     {/* Subtle Streak Saver indicator */}
                     <span
-                      className="inline-flex items-center gap-1 font-mono-code text-[10px] font-bold text-[#4c5b71] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/70"
+                      className="inline-flex items-center gap-1.5 font-mono-code text-[10px] font-bold text-[#4c5b71] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/70"
                       title={`${streakSaversRemaining} Streak Savers remaining`}
                     >
-                      <Shield className="w-3 h-3 text-[#4c5b71]" />
-                      <span>🛡 {streakSaversRemaining} Streak Saver{streakSaversRemaining !== 1 ? 's' : ''}</span>
+                      <StreakSaverIcon className="w-3.5 h-3.5 text-[#4c5b71] shrink-0" />
+                      <span>{streakSaversRemaining} Streak Saver{streakSaversRemaining !== 1 ? 's' : ''}</span>
                     </span>
                   </div>
 
@@ -776,7 +801,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             </button>
 
             <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-[#4c5b71]">
-              <Shield className="w-6 h-6 text-[#4c5b71]" />
+              <StreakSaverIcon className="w-6 h-6 text-[#4c5b71]" />
             </div>
 
             <div className="space-y-1.5">
@@ -798,8 +823,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               </div>
               <div className="h-4 w-px bg-slate-200" />
               <div className="flex items-center gap-1.5 text-[#4c5b71]">
-                <Shield className="w-4 h-4" />
-                <span>🛡 {streakSaversRemaining} Streak Saver{streakSaversRemaining !== 1 ? 's' : ''} remaining</span>
+                <StreakSaverIcon className="w-4 h-4 shrink-0 text-[#4c5b71]" />
+                <span>{streakSaversRemaining} Streak Saver{streakSaversRemaining !== 1 ? 's' : ''} remaining</span>
               </div>
             </div>
 
