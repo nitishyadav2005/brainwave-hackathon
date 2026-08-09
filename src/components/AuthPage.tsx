@@ -62,7 +62,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
       const mockUser: UserProfile = {
         name: finalName,
         email: signInEmail,
-        streak: 11,
+        streak: 60,
+        completedDays: 60,
+        currentDay: 60,
         isAuthenticated: true,
       };
       localStorage.setItem('abtalks_user', JSON.stringify(mockUser));

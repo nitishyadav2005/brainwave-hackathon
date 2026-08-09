@@ -139,9 +139,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
   // 5-Day Extension State & Handlers
   const [extensionInfo, setExtensionInfo] = useState(() => getExtensionInfo(user));
+  const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
+  const [showExtensionActivatedToast, setShowExtensionActivatedToast] = useState(false);
   const [dismissedExtensionPrompt, setDismissedExtensionPrompt] = useState(false);
 
-  const handleActivateExtension = () => {
+  const handleConfirmActivateExtension = () => {
     const now = new Date();
     const endDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
     const startDateStr = now.toISOString();
@@ -177,6 +179,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
       challengeStatus: 'extension',
       isExpired: false,
     });
+
+    setIsExtensionModalOpen(false);
+    setShowExtensionActivatedToast(true);
+    setTimeout(() => {
+      setShowExtensionActivatedToast(false);
+    }, 4500);
   };
 
   // Derived variables based on current user (ensuring clean first name "Nitish", no surname)
@@ -476,38 +484,40 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           <div className="lg:col-span-8 space-y-5 lg:order-1">
             {/* 5-DAY FINISH EXTENSION PROMPT (When reached Day 60 with incomplete days) */}
             {isEligibleForExtension && !dismissedExtensionPrompt && (
-              <section className="bg-gradient-to-br from-slate-900 via-[#1e293b] to-slate-900 rounded-2xl p-5 shadow-sm text-white space-y-3 relative overflow-hidden border border-slate-800 animate-in fade-in">
+              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border-2 border-amber-300/80 space-y-4 relative overflow-hidden animate-in fade-in">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-mono-code text-[10px] font-extrabold uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-md tracking-wider">
+                  <span className="font-mono-code text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-md tracking-wider">
                     ALMOST THERE
                   </span>
-                  <span className="font-mono-code text-xs text-slate-300 font-bold">
-                    {completedDays} / 60 DAYS COMPLETED
+                  <span className="font-mono-code text-xs text-slate-600 font-bold">
+                    {completedDays} / 60 DAYS COMPLETE
                   </span>
                 </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-lg font-extrabold text-white leading-snug">
-                    Take 5 extra days to finish what you started.
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                    You've built most of the way through your 60-day challenge! Your progress and completed projects are safe. Use your one-time 5-day extension to finish your remaining work.
-                  </p>
+                <div className="flex items-start gap-3.5 pt-1">
+                  <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-xl shadow-2xs">
+                    ⏳
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-extrabold text-[#191c1e] leading-tight">
+                      {completedDays} / 60 DAYS COMPLETE
+                    </h3>
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                      You've built most of the way. Take 5 extra days to finish what you started.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
+                <div className="pt-2 space-y-2">
                   <button
-                    onClick={handleActivateExtension}
-                    className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] active:scale-[0.98]"
+                    onClick={() => setIsExtensionModalOpen(true)}
+                    className="w-full py-3 px-4 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
                   >
                     <span>Use 5-Day Extension →</span>
                   </button>
-                  <button
-                    onClick={() => setDismissedExtensionPrompt(true)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer min-h-[40px]"
-                  >
-                    Not Now
-                  </button>
+                  <p className="text-[11px] text-center text-slate-500 font-medium italic">
+                    Your completed work is safe.
+                  </p>
                 </div>
               </section>
             )}
@@ -572,77 +582,106 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
         {/* 5. JOURNEY */}
         <section ref={journeyRef} className="space-y-3 pt-2">
-          {/* ACTIVE 5-DAY EXTENSION BANNER */}
+          {/* ACTIVE 5-DAY EXTENSION CARD */}
           {extensionInfo.extensionUsed && extensionInfo.challengeStatus === 'extension' && !extensionInfo.isExpired && (
-            <div className="bg-amber-50/95 border border-amber-200/90 rounded-2xl p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-in fade-in">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-sm">
-                  ⏳
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono-code text-[10px] font-bold text-amber-800 uppercase tracking-wider bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
-                      FINAL 5 DAYS
-                    </span>
-                    <span className="font-bold text-amber-950 text-xs">
-                      {extensionInfo.extensionDaysRemaining} DAY{extensionInfo.extensionDaysRemaining !== 1 ? 'S' : ''} LEFT
-                    </span>
+            <div className="bg-amber-50/95 border-2 border-amber-300/80 rounded-2xl p-5 shadow-xs space-y-3.5 animate-in fade-in">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-sm">
+                    ⏳
                   </div>
-                  <p className="text-[11px] text-amber-900/80 font-medium mt-0.5">
-                    5-Day Finish Extension active • Complete your remaining challenge days!
-                  </p>
+                  <span className="font-mono-code text-[10px] font-extrabold text-amber-900 uppercase tracking-wider bg-amber-100/90 px-2.5 py-0.5 rounded-md border border-amber-200">
+                    FINAL 5 DAYS
+                  </span>
+                </div>
+                <span className="font-mono-code text-xs font-extrabold text-amber-950 bg-amber-200/90 px-3 py-1 rounded-xl border border-amber-300 shadow-2xs">
+                  {extensionInfo.extensionDaysRemaining} DAY{extensionInfo.extensionDaysRemaining !== 1 ? 'S' : ''} LEFT
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs text-amber-950 font-medium leading-relaxed">
+                  Finish your remaining challenge days and complete your 60-day journey.
+                </p>
+              </div>
+
+              {/* Extension Progress Line */}
+              <div className="space-y-1.5 pt-0.5">
+                <div className="flex items-center justify-between font-mono-code text-[10px] font-extrabold text-amber-900">
+                  <span>EXTENSION TIME USED</span>
+                  <span>{5 - extensionInfo.extensionDaysRemaining + 1} / 5 DAYS</span>
+                </div>
+                <div className="w-full bg-amber-200/80 rounded-full h-2 overflow-hidden border border-amber-300/50">
+                  <div
+                    className="bg-amber-600 h-full rounded-full transition-all duration-300"
+                    style={{ width: `${((5 - extensionInfo.extensionDaysRemaining + 1) / 5) * 100}%` }}
+                  />
                 </div>
               </div>
-              <div className="font-mono-code text-xs font-bold text-amber-900 bg-amber-200/60 px-3 py-1.5 rounded-xl border border-amber-300/80 self-start sm:self-center">
-                {completedDays} / 60 Completed
+
+              <div className="flex items-center justify-between pt-1 border-t border-amber-200/80 font-mono-code text-xs font-extrabold text-amber-950">
+                <span>{completedDays} / 60 DAYS COMPLETE</span>
+                <span className="text-[10px] font-bold text-amber-800/90 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
+                  1-TIME EXTENSION
+                </span>
               </div>
             </div>
           )}
 
-          {/* CHALLENGE COMPLETED BANNER */}
+          {/* CHALLENGE COMPLETED CARD */}
           {completedDays >= 60 && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 font-extrabold text-base shrink-0">
-                  🎉
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono-code text-[10px] font-extrabold text-emerald-800 uppercase bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
-                      CHALLENGE COMPLETE
-                    </span>
-                    <span className="font-mono-code text-[10px] font-bold text-emerald-700">
-                      60 / 60 DAYS • 100%
-                    </span>
-                  </div>
-                  <p className="text-xs text-emerald-950 font-bold mt-0.5">
-                    60 days. You finished what you started.
-                  </p>
-                </div>
+            <div className="bg-emerald-50 border-2 border-emerald-300/90 rounded-2xl p-5 sm:p-6 shadow-xs space-y-3.5 text-center animate-in fade-in">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center mx-auto text-emerald-700 font-extrabold text-xl shadow-2xs">
+                ✓
               </div>
+
+              <div className="space-y-1">
+                <span className="font-mono-code text-[10px] font-extrabold text-emerald-800 uppercase bg-emerald-100 px-2.5 py-0.5 rounded-md border border-emerald-200 inline-block">
+                  CHALLENGE COMPLETE
+                </span>
+                <h3 className="text-2xl font-extrabold text-emerald-950 pt-0.5">
+                  60 / 60 DAYS
+                </h3>
+                <p className="text-xs text-emerald-900 font-extrabold">
+                  60 days. You finished what you started.
+                </p>
+              </div>
+
               <button
                 onClick={() => onNavigate('/progress')}
-                className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98] inline-flex items-center justify-center gap-1.5"
               >
                 View Final Certificate →
               </button>
             </div>
           )}
 
-          {/* EXTENSION EXPIRED BANNER */}
+          {/* EXTENSION EXPIRED CARD */}
           {extensionInfo.isExpired && completedDays < 60 && (
-            <div className="bg-slate-100 border border-slate-300 rounded-2xl p-4 shadow-2xs space-y-1.5 animate-in fade-in">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono-code text-[10px] font-extrabold text-slate-700 uppercase bg-slate-200 px-2 py-0.5 rounded border border-slate-300">
+            <div className="bg-slate-100 border border-slate-300 rounded-2xl p-5 shadow-xs space-y-3 text-center animate-in fade-in">
+              <div className="space-y-1">
+                <span className="font-mono-code text-[10px] font-extrabold text-slate-700 uppercase bg-slate-200 px-2.5 py-0.5 rounded-md border border-slate-300 inline-block">
                   CHALLENGE WINDOW COMPLETE
                 </span>
-                <span className="text-xs font-bold text-slate-800">
-                  {completedDays} / 60 Days Completed
+                <h3 className="text-xl font-extrabold text-slate-900 pt-0.5">
+                  {completedDays} / 60 DAYS COMPLETED
+                </h3>
+                <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md mx-auto">
+                  Your progress is saved. You completed {completedDays} of 60 challenge days.
+                </p>
+              </div>
+
+              <div className="pt-1 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                <button
+                  onClick={() => onNavigate('/progress')}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98]"
+                >
+                  View My Progress →
+                </button>
+                <span className="font-mono-code text-[10px] font-semibold text-slate-500 bg-slate-200/80 px-2.5 py-1 rounded-md">
+                  5-DAY EXTENSION USED
                 </span>
               </div>
-              <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                You made it further than you started! Your completed projects, GitHub submissions, progress reports, and badges remain saved and accessible anytime.
-              </p>
             </div>
           )}
 
@@ -999,6 +1038,77 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               >
                 Not Now
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5-DAY FINISH EXTENSION CONFIRMATION MODAL / BOTTOM SHEET */}
+      {isExtensionModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
+          onClick={() => setIsExtensionModalOpen(false)}
+        >
+          <div
+            className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 border border-slate-200 shadow-2xl space-y-5 animate-in slide-in-from-bottom duration-200 mb-14 sm:mb-0 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700 text-xl font-extrabold shadow-xs">
+              ⏳
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-xl font-extrabold text-[#191c1e]">Finish Strong</h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed px-2">
+                You have 5 extra days to complete the remaining challenge days.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-around font-mono-code text-[11px] font-bold text-slate-700 divide-x divide-slate-200">
+              <div className="px-2">
+                <div className="text-slate-900 text-xs font-extrabold">{completedDays} / 60</div>
+                <div className="text-[10px] text-slate-500 font-medium">Completed</div>
+              </div>
+              <div className="px-2">
+                <div className="text-amber-700 text-xs font-extrabold">5 Extra</div>
+                <div className="text-[10px] text-slate-500 font-medium">Days</div>
+              </div>
+              <div className="px-2">
+                <div className="text-slate-900 text-xs font-extrabold">One-time</div>
+                <div className="text-[10px] text-slate-500 font-medium">Extension</div>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={handleConfirmActivateExtension}
+                className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-3 rounded-xl shadow-xs transition-all cursor-pointer active:scale-[0.99] min-h-[44px]"
+              >
+                Start My Extension →
+              </button>
+              <button
+                onClick={() => setIsExtensionModalOpen(false)}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition-colors cursor-pointer min-h-[40px]"
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EXTENSION ACTIVATED SUCCESS TOAST */}
+      {showExtensionActivatedToast && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-800 flex items-center gap-3 animate-in fade-in slide-in-from-top duration-300 max-w-sm w-[calc(100%-2rem)]">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-extrabold text-sm shrink-0">
+            ✓
+          </div>
+          <div className="space-y-0.5 text-left">
+            <div className="text-xs font-bold text-white uppercase tracking-wider font-mono-code">
+              EXTENSION ACTIVATED
+            </div>
+            <div className="text-[11px] text-slate-300 font-medium">
+              Your final 5 days start now.
             </div>
           </div>
         </div>
