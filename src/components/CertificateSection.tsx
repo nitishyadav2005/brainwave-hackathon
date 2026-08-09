@@ -54,7 +54,7 @@ export const CertificateSection: React.FC<CertificateSectionProps> = ({ onStartC
                   THIS CERTIFIES THAT
                 </p>
                 <div className="text-xl sm:text-2xl font-black text-[#1e293b] tracking-tight underline decoration-amber-400 decoration-2 underline-offset-4">
-                  Nitish Kumar
+                  XYZ
                 </div>
                 <p className="text-[11px] sm:text-xs text-slate-600 max-w-xs mx-auto leading-relaxed pt-1.5">
                   has successfully completed the <strong className="text-slate-800">60-DAY CODING CHALLENGE</strong> and completed their project.
@@ -89,16 +89,16 @@ export const CertificateSection: React.FC<CertificateSectionProps> = ({ onStartC
           </p>
         </div>
 
-        {/* RIGHT COLUMN (Lg: 5 cols) — REQUIREMENTS & GRACE CONNECTION */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+        {/* RIGHT COLUMN (Lg: 5 cols) — REQUIREMENTS */}
+        <div className="lg:col-span-5 flex flex-col justify-center">
           {/* Certificate Requirements Box */}
-          <div className="clay-card-shallow p-5 sm:p-6 space-y-3.5 border border-slate-200/80">
+          <div className="clay-card-shallow p-5 sm:p-6 space-y-4 border border-slate-200/80">
             <h4 className="font-mono-code text-xs font-extrabold text-[#1e293b] uppercase tracking-wider flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>To receive the certificate:</span>
             </h4>
 
-            <ul className="space-y-2 text-xs sm:text-sm text-slate-700 font-medium">
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700 font-medium">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>Complete all 60 challenge days</span>
@@ -116,51 +116,12 @@ export const CertificateSection: React.FC<CertificateSectionProps> = ({ onStartC
             <div className="pt-2">
               <button
                 onClick={onStartChallenge}
-                className="w-full clay-btn-primary py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer group active:scale-98 transition-all"
+                className="w-full clay-btn-primary py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer group active:scale-98 transition-all"
               >
                 <span>Get your Completion Certificate</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-          </div>
-
-          {/* 5-Day Grace Connection Card */}
-          <div className="clay-card-shallow p-5 sm:p-6 bg-slate-50/90 border border-slate-200/90 space-y-3">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-600 shrink-0" />
-              <span className="font-mono-code text-[11px] font-bold text-[#1e293b] uppercase">
-                5-Day Grace Compatibility
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Need more time to finish your project? Use your one-time 5-day grace period and complete your project within the extra 5 days.
-            </p>
-
-            {/* Timeline Flow Visual */}
-            <div className="bg-white p-2.5 rounded-xl border border-slate-200 font-mono-code text-[10px] sm:text-[11px] font-bold text-slate-700">
-              <div className="flex flex-wrap items-center justify-between gap-1">
-                <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                  60 DAYS ✓
-                </span>
-                <span className="text-slate-300">+</span>
-                <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                  UP TO 5 GRACE DAYS
-                </span>
-                <span className="text-slate-300">↓</span>
-                <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-800">
-                  PROJECT COMPLETE
-                </span>
-                <span className="text-slate-300">↓</span>
-                <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 flex items-center gap-1">
-                  🏆 CERTIFICATE
-                </span>
-              </div>
-            </div>
-
-            <p className="text-[10px] font-mono-code text-slate-500 leading-normal pt-1">
-              The official challenge remains 60 days. The grace period does NOT turn the challenge into a 65-day challenge.
-            </p>
           </div>
         </div>
       </div>
