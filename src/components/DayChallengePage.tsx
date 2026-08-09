@@ -263,7 +263,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
               onClick={() => onNavigate('/dashboard')}
               className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer mt-3"
             >
-              <span>Continue to Day {dayNumber + 1} →</span>
+              <span>{dayNumber >= 60 ? 'Finish Your Journey →' : `Continue to Day ${dayNumber + 1} →`}</span>
             </button>
           </div>
         ) : (

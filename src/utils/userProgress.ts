@@ -33,23 +33,47 @@ export function getExtensionInfo(user: UserProfile | null) {
   let extensionUsed = false;
   let startDate: string | null = null;
   let endDate: string | null = null;
-  let challengeStatus: 'active' | 'extension' | 'completed' | 'extension_expired' = 'active';
+  let projectCompleted = false;
+  let challengeStatus: 'active' | 'day60_decision' | 'grace_period' | 'completed' | 'grace_expired' | 'extension' | 'extension_expired' = 'day60_decision';
 
   if (typeof window !== 'undefined') {
-    extensionUsed = localStorage.getItem('abtalks_extension_used') === 'true' || !!user?.extensionUsed;
-    startDate = localStorage.getItem('abtalks_extension_start_date') || user?.extensionStartDate || null;
-    endDate = localStorage.getItem('abtalks_extension_end_date') || user?.extensionEndDate || null;
+    extensionUsed =
+      localStorage.getItem('abtalks_grace_used') === 'true' ||
+      localStorage.getItem('abtalks_extension_used') === 'true' ||
+      !!user?.gracePeriodUsed ||
+      !!user?.extensionUsed;
+
+    startDate =
+      localStorage.getItem('abtalks_grace_start_date') ||
+      localStorage.getItem('abtalks_extension_start_date') ||
+      user?.graceStartDate ||
+      user?.extensionStartDate ||
+      null;
+
+    endDate =
+      localStorage.getItem('abtalks_grace_end_date') ||
+      localStorage.getItem('abtalks_extension_end_date') ||
+      user?.graceEndDate ||
+      user?.extensionEndDate ||
+      null;
+
+    projectCompleted =
+      localStorage.getItem('abtalks_project_completed') === 'true' || !!user?.projectCompleted;
+
     const storedStatus = localStorage.getItem('abtalks_challenge_status') as any;
     if (storedStatus) {
       challengeStatus = storedStatus;
     } else if (user?.challengeStatus) {
       challengeStatus = user.challengeStatus;
+    } else {
+      challengeStatus = 'day60_decision';
     }
   } else {
-    extensionUsed = !!user?.extensionUsed;
-    startDate = user?.extensionStartDate || null;
-    endDate = user?.extensionEndDate || null;
-    challengeStatus = user?.challengeStatus || 'active';
+    extensionUsed = !!user?.gracePeriodUsed || !!user?.extensionUsed;
+    startDate = user?.graceStartDate || user?.extensionStartDate || null;
+    endDate = user?.graceEndDate || user?.extensionEndDate || null;
+    projectCompleted = !!user?.projectCompleted;
+    challengeStatus = user?.challengeStatus || 'day60_decision';
   }
 
   let extensionDaysRemaining = 5;
@@ -67,8 +91,8 @@ export function getExtensionInfo(user: UserProfile | null) {
     }
   }
 
-  if (isExpired && challengeStatus === 'extension') {
-    challengeStatus = 'extension_expired';
+  if (isExpired && (challengeStatus === 'grace_period' || challengeStatus === 'extension')) {
+    challengeStatus = 'grace_expired';
   }
 
   return {
@@ -77,6 +101,7 @@ export function getExtensionInfo(user: UserProfile | null) {
     extensionDaysRemaining,
     extensionStartDate: startDate,
     extensionEndDate: endDate,
+    projectCompleted,
     challengeStatus,
     isExpired,
   };

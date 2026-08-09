@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
 import { getEffectiveUserProgress, getExtensionInfo } from '../utils/userProgress';
+import { CertificateModal } from './CertificateModal';
 import {
   Flame,
   Check,
@@ -55,9 +56,10 @@ interface DashboardPageProps {
   user: UserProfile | null;
   onNavigate: (route: string) => void;
   onLogout: () => void;
+  onUpdateUser?: (updated: UserProfile) => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, onLogout }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, onLogout, onUpdateUser }) => {
   const journeyRef = useRef<HTMLDivElement>(null);
 
   // Selected report modal state
@@ -137,36 +139,73 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
     setShowSavedSuccessToast(true);
   };
 
-  // 5-Day Extension State & Handlers
+  // 5-Day Grace Period & Certificate State & Handlers
   const [extensionInfo, setExtensionInfo] = useState(() => getExtensionInfo(user));
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
   const [showExtensionActivatedToast, setShowExtensionActivatedToast] = useState(false);
   const [dismissedExtensionPrompt, setDismissedExtensionPrompt] = useState(false);
+  const [isCertificateOpen, setIsCertificateOpen] = useState(false);
+  const [isGraceCompleteModalOpen, setIsGraceCompleteModalOpen] = useState(false);
 
-  const handleConfirmActivateExtension = () => {
+  // Handler: Option 1 (Project Complete -> Get Certificate)
+  const handleMarkProjectComplete = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('abtalks_challenge_status', 'completed');
+      localStorage.setItem('abtalks_project_completed', 'true');
+
+      try {
+        const savedUser = localStorage.getItem('abtalks_user');
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          parsed.challengeStatus = 'completed';
+          parsed.projectCompleted = true;
+          localStorage.setItem('abtalks_user', JSON.stringify(parsed));
+        }
+      } catch (e) {
+        console.warn('Error saving completed status to user:', e);
+      }
+    }
+
+    setExtensionInfo((prev) => ({
+      ...prev,
+      challengeStatus: 'completed',
+      projectCompleted: true,
+    }));
+
+    setIsGraceCompleteModalOpen(false);
+    setIsCertificateOpen(true);
+  };
+
+  // Handler: Option 2 (Give Me 5 More Days -> Grace Period)
+  const handleActivateGracePeriod = () => {
     const now = new Date();
     const endDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
     const startDateStr = now.toISOString();
     const endDateStr = endDate.toISOString();
 
     if (typeof window !== 'undefined') {
+      localStorage.setItem('abtalks_grace_used', 'true');
       localStorage.setItem('abtalks_extension_used', 'true');
-      localStorage.setItem('abtalks_extension_start_date', startDateStr);
-      localStorage.setItem('abtalks_extension_end_date', endDateStr);
-      localStorage.setItem('abtalks_challenge_status', 'extension');
+      localStorage.setItem('abtalks_grace_start_date', startDateStr);
+      localStorage.setItem('abtalks_grace_end_date', endDateStr);
+      localStorage.setItem('abtalks_challenge_status', 'grace_period');
 
       try {
         const savedUser = localStorage.getItem('abtalks_user');
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
+          parsed.gracePeriodUsed = true;
           parsed.extensionUsed = true;
-          parsed.extensionStartDate = startDateStr;
-          parsed.extensionEndDate = endDateStr;
-          parsed.challengeStatus = 'extension';
+          parsed.graceStartDate = startDateStr;
+          parsed.graceEndDate = endDateStr;
+          parsed.challengeStatus = 'grace_period';
           localStorage.setItem('abtalks_user', JSON.stringify(parsed));
+          if (onUpdateUser) {
+            onUpdateUser(parsed);
+          }
         }
       } catch (e) {
-        console.warn('Error saving extension to user:', e);
+        console.warn('Error saving grace period to user:', e);
       }
     }
 
@@ -176,15 +215,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
       extensionDaysRemaining: 5,
       extensionStartDate: startDateStr,
       extensionEndDate: endDateStr,
-      challengeStatus: 'extension',
+      projectCompleted: false,
+      challengeStatus: 'grace_period',
       isExpired: false,
     });
 
     setIsExtensionModalOpen(false);
-    setShowExtensionActivatedToast(true);
-    setTimeout(() => {
-      setShowExtensionActivatedToast(false);
-    }, 4500);
+    onNavigate('/grace');
   };
 
   // Derived variables based on current user (ensuring clean first name "Nitish", no surname)
@@ -567,11 +604,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
           {/* Primary Full-Width CTA */}
           <button
-            onClick={() => onNavigate(`/day/${currentDay}`)}
+            onClick={() => {
+              if (completedDays >= 60) {
+                if (extensionInfo.challengeStatus === 'grace_period') {
+                  onNavigate('/grace');
+                } else if (extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted) {
+                  setIsCertificateOpen(true);
+                } else {
+                  journeyRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }
+              } else {
+                onNavigate(`/day/${currentDay}`);
+              }
+            }}
             className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3 px-4 rounded-xl shadow-sm transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer mt-2"
           >
             <span>
-              {isFirstDay
+              {completedDays >= 60
+                ? extensionInfo.challengeStatus === 'grace_period'
+                  ? 'Continue Finishing Project →'
+                  : extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted
+                  ? 'View Completion Certificate →'
+                  : 'View Challenge Completion Options →'
+                : isFirstDay
                 ? 'Start Day 01 →'
                 : isMissedYesterday
                 ? 'Continue Challenge →'
@@ -582,57 +637,143 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
         {/* 5. JOURNEY */}
         <section ref={journeyRef} className="space-y-3 pt-2">
-          {/* ACTIVE 5-DAY EXTENSION CARD */}
-          {extensionInfo.extensionUsed && extensionInfo.challengeStatus === 'extension' && !extensionInfo.isExpired && (
-            <div className="bg-amber-50/95 border-2 border-amber-300/80 rounded-2xl p-5 shadow-xs space-y-3.5 animate-in fade-in">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-sm">
-                    ⏳
-                  </div>
-                  <span className="font-mono-code text-[10px] font-extrabold text-amber-900 uppercase tracking-wider bg-amber-100/90 px-2.5 py-0.5 rounded-md border border-amber-200">
-                    FINAL 5 DAYS
+          {/* DAY 60 DECISION CARD */}
+          {completedDays >= 60 &&
+            (!extensionInfo.challengeStatus ||
+              extensionInfo.challengeStatus === 'day60_decision') &&
+            !extensionInfo.projectCompleted && (
+              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border-2 border-[#4c5b71]/20 space-y-4 animate-in fade-in">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="font-mono-code text-[10px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-md tracking-wider flex items-center gap-1">
+                    <span>🎉</span> 60 DAYS COMPLETE
+                  </span>
+                  <span className="font-mono-code text-xs text-slate-600 font-bold">
+                    60 / 60 DAYS
                   </span>
                 </div>
-                <span className="font-mono-code text-xs font-extrabold text-amber-950 bg-amber-200/90 px-3 py-1 rounded-xl border border-amber-300 shadow-2xs">
-                  {extensionInfo.extensionDaysRemaining} DAY{extensionInfo.extensionDaysRemaining !== 1 ? 'S' : ''} LEFT
-                </span>
-              </div>
 
-              <div className="space-y-1">
-                <p className="text-xs text-amber-950 font-medium leading-relaxed">
-                  Finish your remaining challenge days and complete your 60-day journey.
-                </p>
-              </div>
-
-              {/* Extension Progress Line */}
-              <div className="space-y-1.5 pt-0.5">
-                <div className="flex items-center justify-between font-mono-code text-[10px] font-extrabold text-amber-900">
-                  <span>EXTENSION TIME USED</span>
-                  <span>{5 - extensionInfo.extensionDaysRemaining + 1} / 5 DAYS</span>
+                <div className="space-y-1.5 text-left">
+                  <h3 className="text-xl font-extrabold text-[#191c1e] leading-snug">
+                    Did you complete your project?
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                    You've reached the end of the 60-day challenge. Tell us how you want to finish your journey.
+                  </p>
                 </div>
-                <div className="w-full bg-amber-200/80 rounded-full h-2 overflow-hidden border border-amber-300/50">
-                  <div
-                    className="bg-amber-600 h-full rounded-full transition-all duration-300"
-                    style={{ width: `${((5 - extensionInfo.extensionDaysRemaining + 1) / 5) * 100}%` }}
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {/* OPTION 1: PROJECT COMPLETE */}
+                  <div className="bg-emerald-50/80 border-2 border-emerald-300 rounded-2xl p-4 flex flex-col justify-between space-y-3.5 hover:border-emerald-400 transition-all shadow-2xs">
+                    <div className="space-y-1 text-left">
+                      <div className="flex items-center gap-1.5 text-emerald-800 font-extrabold text-xs">
+                        <span className="w-5 h-5 rounded-full bg-emerald-200 text-emerald-900 flex items-center justify-center text-[11px] font-bold">✓</span>
+                        <span>PROJECT COMPLETE</span>
+                      </div>
+                      <p className="text-xs text-emerald-950 font-bold pt-1">
+                        "I completed my project."
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleMarkProjectComplete}
+                      className="w-full py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 min-h-[40px]"
+                    >
+                      <span>Get My Completion Certificate →</span>
+                    </button>
+                  </div>
+
+                  {/* OPTION 2: NEED MORE TIME */}
+                  {!extensionInfo.extensionUsed && (
+                    <div className="bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-4 flex flex-col justify-between space-y-3.5 hover:border-amber-400 transition-all shadow-2xs">
+                      <div className="space-y-1 text-left">
+                        <div className="flex items-center gap-1.5 text-amber-900 font-extrabold text-xs">
+                          <span className="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-[11px] font-bold">⏳</span>
+                          <span>NEED MORE TIME</span>
+                        </div>
+                        <p className="text-xs text-amber-950 font-bold pt-1">
+                          "I need a little more time to finish."
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleActivateGracePeriod}
+                        className="w-full py-2.5 px-3 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 min-h-[40px]"
+                      >
+                        <span>Give Me 5 More Days →</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+          {/* ACTIVE 5-DAY GRACE PERIOD CARD */}
+          {(extensionInfo.challengeStatus === 'grace_period' ||
+            extensionInfo.challengeStatus === 'extension') &&
+            !extensionInfo.isExpired &&
+            !extensionInfo.projectCompleted && (
+              <div className="bg-amber-50/95 border-2 border-amber-300/80 rounded-2xl p-5 shadow-xs space-y-3.5 animate-in fade-in">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-sm">
+                      ⏳
+                    </div>
+                    <span className="font-mono-code text-[10px] font-extrabold text-amber-900 uppercase tracking-wider bg-amber-100/90 px-2.5 py-0.5 rounded-md border border-amber-200">
+                      FINAL 5 DAYS
+                    </span>
+                  </div>
+                  <span className="font-mono-code text-xs font-extrabold text-amber-950 bg-amber-200/90 px-3 py-1 rounded-xl border border-amber-300 shadow-2xs">
+                    {extensionInfo.extensionDaysRemaining} DAY{extensionInfo.extensionDaysRemaining !== 1 ? 'S' : ''} LEFT
+                  </span>
+                </div>
+
+                <div className="space-y-1 text-left">
+                  <p className="text-xs text-amber-950 font-medium leading-relaxed">
+                    Your 60-day challenge is complete. You have 5 extra days to finish your project.
+                  </p>
+                </div>
+
+                {/* Progress line */}
+                <div className="space-y-1.5 pt-0.5">
+                  <div className="flex items-center justify-between font-mono-code text-[10px] font-extrabold text-amber-900">
+                    <span>GRACE PERIOD TIME USED</span>
+                    <span>{5 - extensionInfo.extensionDaysRemaining + 1} / 5 DAYS</span>
+                  </div>
+                  <div className="w-full bg-amber-200/80 rounded-full h-2 overflow-hidden border border-amber-300/50">
+                    <div
+                      className="bg-amber-600 h-full rounded-full transition-all duration-300"
+                      style={{ width: `${((5 - extensionInfo.extensionDaysRemaining + 1) / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-amber-200/80 font-mono-code text-xs font-extrabold text-amber-950">
+                  <span>60 / 60 DAYS</span>
+                  <span className="text-[10px] font-bold text-amber-800/90 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
+                    1-TIME GRACE PERIOD
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <button
+                    onClick={() => onNavigate('/grace')}
+                    className="flex-1 py-3 px-4 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
+                  >
+                    <span>Continue Finishing →</span>
+                  </button>
+                  <button
+                    onClick={() => setIsGraceCompleteModalOpen(true)}
+                    className="py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
+                  >
+                    <span>Mark Project Complete</span>
+                  </button>
                 </div>
               </div>
-
-              <div className="flex items-center justify-between pt-1 border-t border-amber-200/80 font-mono-code text-xs font-extrabold text-amber-950">
-                <span>{completedDays} / 60 DAYS COMPLETE</span>
-                <span className="text-[10px] font-bold text-amber-800/90 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
-                  1-TIME EXTENSION
-                </span>
-              </div>
-            </div>
-          )}
+            )}
 
           {/* CHALLENGE COMPLETED CARD */}
-          {completedDays >= 60 && (
+          {(extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted) && (
             <div className="bg-emerald-50 border-2 border-emerald-300/90 rounded-2xl p-5 sm:p-6 shadow-xs space-y-3.5 text-center animate-in fade-in">
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center mx-auto text-emerald-700 font-extrabold text-xl shadow-2xs">
-                ✓
+                🎉
               </div>
 
               <div className="space-y-1">
@@ -643,31 +784,32 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                   60 / 60 DAYS
                 </h3>
                 <p className="text-xs text-emerald-900 font-extrabold">
-                  60 days. You finished what you started.
+                  60 days of building. You finished what you started.
                 </p>
               </div>
 
               <button
-                onClick={() => onNavigate('/progress')}
+                onClick={() => setIsCertificateOpen(true)}
                 className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98] inline-flex items-center justify-center gap-1.5"
               >
-                View Final Certificate →
+                <span>View Completion Certificate →</span>
               </button>
             </div>
           )}
 
-          {/* EXTENSION EXPIRED CARD */}
-          {extensionInfo.isExpired && completedDays < 60 && (
+          {/* GRACE EXPIRED CARD */}
+          {(extensionInfo.challengeStatus === 'grace_expired' ||
+            (extensionInfo.isExpired && !extensionInfo.projectCompleted)) && (
             <div className="bg-slate-100 border border-slate-300 rounded-2xl p-5 shadow-xs space-y-3 text-center animate-in fade-in">
               <div className="space-y-1">
                 <span className="font-mono-code text-[10px] font-extrabold text-slate-700 uppercase bg-slate-200 px-2.5 py-0.5 rounded-md border border-slate-300 inline-block">
-                  CHALLENGE WINDOW COMPLETE
+                  CHALLENGE WINDOW CLOSED
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 pt-0.5">
-                  {completedDays} / 60 DAYS COMPLETED
+                  60 / 60 DAYS SAVED
                 </h3>
                 <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md mx-auto">
-                  Your progress is saved. You completed {completedDays} of 60 challenge days.
+                  Your 5-day grace period has ended. Your 60-day progress is saved.
                 </p>
               </div>
 
@@ -679,7 +821,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                   View My Progress →
                 </button>
                 <span className="font-mono-code text-[10px] font-semibold text-slate-500 bg-slate-200/80 px-2.5 py-1 rounded-md">
-                  5-DAY EXTENSION USED
+                  5-DAY GRACE PERIOD USED
                 </span>
               </div>
             </div>
@@ -1081,7 +1223,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
             <div className="space-y-2 pt-1">
               <button
-                onClick={handleConfirmActivateExtension}
+                onClick={handleActivateGracePeriod}
                 className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-3 rounded-xl shadow-xs transition-all cursor-pointer active:scale-[0.99] min-h-[44px]"
               >
                 Start My Extension →
@@ -1096,6 +1238,52 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           </div>
         </div>
       )}
+
+      {/* CONFIRMATION MODAL BEFORE MARKING PROJECT COMPLETE DURING GRACE PERIOD */}
+      {isGraceCompleteModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
+          onClick={() => setIsGraceCompleteModalOpen(false)}
+        >
+          <div
+            className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 border border-slate-200 shadow-2xl space-y-5 animate-in slide-in-from-bottom duration-200 mb-14 sm:mb-0 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-700 text-xl font-extrabold shadow-xs">
+              ✓
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-xl font-extrabold text-[#191c1e]">Ready to finish?</h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed px-2">
+                You're about to complete your ABTalks journey and receive your official Completion Certificate.
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={handleMarkProjectComplete}
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-3 rounded-xl shadow-xs transition-all cursor-pointer active:scale-[0.99] min-h-[44px]"
+              >
+                Complete Challenge & Get Certificate →
+              </button>
+              <button
+                onClick={() => setIsGraceCompleteModalOpen(false)}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition-colors cursor-pointer min-h-[40px]"
+              >
+                Not Yet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OFFICIAL COMPLETION CERTIFICATE MODAL */}
+      <CertificateModal
+        isOpen={isCertificateOpen}
+        onClose={() => setIsCertificateOpen(false)}
+        user={user}
+      />
 
       {/* EXTENSION ACTIVATED SUCCESS TOAST */}
       {showExtensionActivatedToast && (

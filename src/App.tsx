@@ -12,6 +12,7 @@ import { DayChallengePage } from './components/DayChallengePage';
 import { ProfilePage } from './components/ProfilePage';
 import { ProgressPage } from './components/ProgressPage';
 import { ReportPage } from './components/ReportPage';
+import { GracePage } from './components/GracePage';
 import { UserProfile } from './types';
 import { formatFirstName } from './utils/nameUtils';
 import { getEffectiveUserProgress, getExtensionInfo } from './utils/userProgress';
@@ -151,10 +152,31 @@ export default function App() {
     );
   }
 
+  // Route: /grace
+  if (currentRoute === '/grace') {
+    return (
+      <GracePage
+        user={user}
+        onNavigate={handleNavigate}
+        onUpdateUser={handleUpdateUser}
+      />
+    );
+  }
+
   // Route: /day/:id
   if (currentRoute.startsWith('/day/')) {
     const dayStr = currentRoute.replace('/day/', '');
     const dayNum = parseInt(dayStr, 10) || 12;
+    if (dayNum > 60) {
+      // Day 61+ does not exist, redirect to /grace
+      return (
+        <GracePage
+          user={user}
+          onNavigate={handleNavigate}
+          onUpdateUser={handleUpdateUser}
+        />
+      );
+    }
     return (
       <DayChallengePage
         dayNumber={dayNum}

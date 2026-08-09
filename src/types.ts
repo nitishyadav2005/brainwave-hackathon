@@ -34,7 +34,13 @@ export interface UserProfile {
   extensionDaysRemaining?: number;
   extensionStartDate?: string | null;
   extensionEndDate?: string | null;
-  challengeStatus?: 'active' | 'extension' | 'completed' | 'extension_expired';
+  projectCompleted?: boolean;
+  gracePeriodUsed?: boolean;
+  graceDaysTotal?: number;
+  graceDaysRemaining?: number;
+  graceStartDate?: string | null;
+  graceEndDate?: string | null;
+  challengeStatus?: 'active' | 'day60_decision' | 'grace_period' | 'completed' | 'grace_expired' | 'extension' | 'extension_expired';
   isAuthenticated: boolean;
 }
 
