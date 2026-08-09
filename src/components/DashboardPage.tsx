@@ -160,6 +160,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           parsed.challengeStatus = 'completed';
           parsed.projectCompleted = true;
           localStorage.setItem('abtalks_user', JSON.stringify(parsed));
+          if (onUpdateUser) {
+            onUpdateUser(parsed);
+          }
         }
       } catch (e) {
         console.warn('Error saving completed status to user:', e);
@@ -237,12 +240,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const streakDays = progress.streakDays;
   const completedDays = progress.completedDays;
   const totalDays = 60;
-  const progressDay = isFirstDay ? 0 : currentDay;
-  const completionPercentage = isFirstDay ? 0 : progress.completionPercentage;
+  const progressDay = isFirstDay ? 0 : completedDays;
+  const completionPercentage = isFirstDay ? 0 : Math.round((completedDays / 60) * 100);
 
-  // Eligible for 5-Day Extension if at/past Day 60, completed < 60 days, and extension not yet used
+  // Eligible for 5-Day Extension ONLY AFTER completing Day 60 and if grace period option is chosen
   const isEligibleForExtension =
-    currentDay >= 60 && completedDays < 60 && !extensionInfo.extensionUsed;
+    completedDays >= 60 && !extensionInfo.extensionUsed && !extensionInfo.projectCompleted;
+
+  const canShowCertificate =
+    completedDays >= 60 &&
+    (extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted === true);
 
   const scrollToJourney = () => {
     if (journeyRef.current) {
@@ -608,7 +615,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               if (completedDays >= 60) {
                 if (extensionInfo.challengeStatus === 'grace_period') {
                   onNavigate('/grace');
-                } else if (extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted) {
+                } else if (canShowCertificate) {
                   setIsCertificateOpen(true);
                 } else {
                   journeyRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -623,7 +630,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               {completedDays >= 60
                 ? extensionInfo.challengeStatus === 'grace_period'
                   ? 'Continue Finishing Project →'
-                  : extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted
+                  : canShowCertificate
                   ? 'View Completion Certificate →'
                   : 'View Challenge Completion Options →'
                 : isFirstDay
@@ -770,7 +777,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             )}
 
           {/* CHALLENGE COMPLETED CARD */}
-          {(extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted) && (
+          {canShowCertificate && (
             <div className="bg-emerald-50 border-2 border-emerald-300/90 rounded-2xl p-5 sm:p-6 shadow-xs space-y-3.5 text-center animate-in fade-in">
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center mx-auto text-emerald-700 font-extrabold text-xl shadow-2xs">
                 🎉
@@ -1280,7 +1287,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
       {/* OFFICIAL COMPLETION CERTIFICATE MODAL */}
       <CertificateModal
-        isOpen={isCertificateOpen}
+        isOpen={isCertificateOpen && canShowCertificate}
         onClose={() => setIsCertificateOpen(false)}
         user={user}
       />

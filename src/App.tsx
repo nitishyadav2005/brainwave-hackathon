@@ -24,23 +24,30 @@ export default function App() {
 
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
+      // Clear day 60 completed if it was auto-set previously, so user is at Day 59 complete
+      if (typeof window !== 'undefined' && !localStorage.getItem('abtalks_day60_user_submitted')) {
+        localStorage.removeItem('abtalks_day60_completed');
+        localStorage.removeItem('abtalks_day60_submitted');
+        localStorage.removeItem('abtalks_project_completed');
+        localStorage.removeItem('abtalks_challenge_status');
+      }
+
       const saved = localStorage.getItem('abtalks_user');
       let parsed = saved ? JSON.parse(saved) : null;
       if (!parsed) {
         parsed = {
           name: 'Nitish',
           email: 'nitishyadav5098@gmail.com',
-          streak: 60,
-          completedDays: 60,
+          streak: 59,
+          completedDays: 59,
           currentDay: 60,
+          projectCompleted: false,
+          challengeStatus: 'active',
           isAuthenticated: true,
         };
       }
       if (parsed) {
         parsed.name = formatFirstName(parsed.name);
-        parsed.streak = 60;
-        parsed.completedDays = 60;
-        parsed.currentDay = 60;
         const progress = getEffectiveUserProgress(parsed);
         const extension = getExtensionInfo(parsed);
         parsed.currentDay = progress.currentDay;
@@ -49,6 +56,7 @@ export default function App() {
         parsed.extensionUsed = extension.extensionUsed;
         parsed.extensionDaysRemaining = extension.extensionDaysRemaining;
         parsed.challengeStatus = extension.challengeStatus;
+        parsed.projectCompleted = extension.projectCompleted;
         localStorage.setItem('abtalks_user', JSON.stringify(parsed));
       }
       return parsed;
@@ -56,8 +64,8 @@ export default function App() {
       return {
         name: 'Nitish',
         email: 'nitishyadav5098@gmail.com',
-        streak: 60,
-        completedDays: 60,
+        streak: 59,
+        completedDays: 59,
         currentDay: 60,
         isAuthenticated: true,
       };
@@ -126,6 +134,7 @@ export default function App() {
         user={user}
         onNavigate={handleNavigate}
         onLogout={handleLogout}
+        onUpdateUser={handleUpdateUser}
       />
     );
   }

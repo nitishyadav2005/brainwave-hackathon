@@ -161,6 +161,9 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
     localStorage.setItem(legacyStorageKey, 'true');
     localStorage.setItem(submitFlagKey, 'true');
     localStorage.setItem(`abtalks_day${dayNumber}_submitted_at`, new Date().toISOString());
+    if (dayNumber === 60) {
+      localStorage.setItem('abtalks_day60_user_submitted', 'true');
+    }
 
     try {
       const savedUser = localStorage.getItem('abtalks_user');
