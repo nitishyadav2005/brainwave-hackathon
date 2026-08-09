@@ -1,8 +1,13 @@
 import { UserProfile } from '../types';
 
 export function getEffectiveUserProgress(user: UserProfile | null) {
+  const currentDay = user?.currentDay ?? 55;
+  const completedDays = Math.max(0, currentDay - 1); // 54 completed days
+  const streakDays = Math.max(0, currentDay - 1); // 54 day streak
+
   if (typeof window !== 'undefined') {
-    for (let i = 1; i <= 60; i++) {
+    // Mark days 1 to 54 as completed and submitted
+    for (let i = 1; i <= completedDays; i++) {
       if (!localStorage.getItem(`abtalks_day${i}_submitted`)) {
         localStorage.setItem(`abtalks_day${i}_submitted`, 'true');
       }
@@ -10,16 +15,14 @@ export function getEffectiveUserProgress(user: UserProfile | null) {
         localStorage.setItem(`abtalks_day${i}_completed`, 'true');
       }
     }
+    // Remove completed status for active day 55 onwards
+    for (let i = currentDay; i <= 60; i++) {
+      localStorage.removeItem(`abtalks_day${i}_submitted`);
+      localStorage.removeItem(`abtalks_day${i}_completed`);
+    }
   }
 
-  const baseCompleted = user?.completedDays ?? 60;
-  const baseStreak = user?.streak ?? 60;
-  const baseCurrentDay = user?.currentDay ?? 60;
-
-  const completedDays = Math.max(baseCompleted, 60);
-  const streakDays = Math.max(baseStreak, 60);
-  const currentDay = 60;
-  const completionPercentage = 100;
+  const completionPercentage = Math.round((completedDays / 60) * 100);
 
   return {
     currentDay,
@@ -34,7 +37,9 @@ export function getExtensionInfo(user: UserProfile | null) {
   let startDate: string | null = null;
   let endDate: string | null = null;
   let projectCompleted = false;
-  let challengeStatus: 'active' | 'day60_decision' | 'grace_period' | 'completed' | 'grace_expired' | 'extension' | 'extension_expired' = 'day60_decision';
+  let challengeStatus: 'active' | 'day60_decision' | 'grace_period' | 'completed' | 'grace_expired' | 'extension' | 'extension_expired' = 'active';
+
+  const currentDay = user?.currentDay ?? 55;
 
   if (typeof window !== 'undefined') {
     extensionUsed =
@@ -66,14 +71,14 @@ export function getExtensionInfo(user: UserProfile | null) {
     } else if (user?.challengeStatus) {
       challengeStatus = user.challengeStatus;
     } else {
-      challengeStatus = 'day60_decision';
+      challengeStatus = currentDay >= 60 ? 'day60_decision' : 'active';
     }
   } else {
     extensionUsed = !!user?.gracePeriodUsed || !!user?.extensionUsed;
     startDate = user?.graceStartDate || user?.extensionStartDate || null;
     endDate = user?.graceEndDate || user?.extensionEndDate || null;
     projectCompleted = !!user?.projectCompleted;
-    challengeStatus = user?.challengeStatus || 'day60_decision';
+    challengeStatus = user?.challengeStatus || (currentDay >= 60 ? 'day60_decision' : 'active');
   }
 
   let extensionDaysRemaining = 5;

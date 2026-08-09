@@ -29,17 +29,17 @@ export default function App() {
         parsed = {
           name: 'Nitish',
           email: 'nitishyadav5098@gmail.com',
-          streak: 60,
-          completedDays: 60,
-          currentDay: 60,
+          streak: 54,
+          completedDays: 54,
+          currentDay: 55,
           isAuthenticated: true,
         };
       }
       if (parsed) {
         parsed.name = formatFirstName(parsed.name);
-        parsed.streak = 60;
-        parsed.completedDays = 60;
-        parsed.currentDay = 60;
+        parsed.streak = 54;
+        parsed.completedDays = 54;
+        parsed.currentDay = 55;
         const progress = getEffectiveUserProgress(parsed);
         const extension = getExtensionInfo(parsed);
         parsed.currentDay = progress.currentDay;
@@ -55,9 +55,9 @@ export default function App() {
       return {
         name: 'Nitish',
         email: 'nitishyadav5098@gmail.com',
-        streak: 60,
-        completedDays: 60,
-        currentDay: 60,
+        streak: 54,
+        completedDays: 54,
+        currentDay: 55,
         isAuthenticated: true,
       };
     }
