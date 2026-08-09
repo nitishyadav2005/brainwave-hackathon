@@ -3,6 +3,8 @@ import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { ProofOfWorkSection } from './components/ProofOfWorkSection';
+import { BuiltForRealLifeSection } from './components/BuiltForRealLifeSection';
+import { CertificateSection } from './components/CertificateSection';
 import { FinalCTASection } from './components/FinalCTASection';
 import { Footer } from './components/Footer';
 import { TrackModal } from './components/TrackModal';
@@ -197,11 +199,17 @@ export default function App() {
         {/* Hero Viewport */}
         <HeroSection onStartChallenge={handleStartChallengeFromLanding} />
 
-        {/* How ABTalks Works */}
+        {/* How ABTalks Works — Daily System */}
         <HowItWorksSection />
 
         {/* Dual Proof Signals (GitHub + LinkedIn) */}
         <ProofOfWorkSection />
+
+        {/* Built For Real Life (Streak Savers + 5-Day Grace) */}
+        <BuiltForRealLifeSection />
+
+        {/* Finish With Proof (Completion Certificate) */}
+        <CertificateSection onStartChallenge={handleStartChallengeFromLanding} />
 
         {/* Final Conversion CTA */}
         <FinalCTASection onStartChallenge={handleStartChallengeFromLanding} />

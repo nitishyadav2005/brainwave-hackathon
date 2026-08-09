@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Flame, Code2, ShieldCheck, Award } from 'lucide-react';
+import { ArrowRight, Flame, ShieldCheck, Award } from 'lucide-react';
 
 interface HeroSectionProps {
   onStartChallenge: () => void;
@@ -7,7 +7,7 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onStartChallenge }) => {
   return (
-    <section className="relative px-4 sm:px-6 lg:px-8 pt-6 pb-8 w-full max-w-md lg:max-w-6xl mx-auto">
+    <section className="relative px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8 w-full max-w-md lg:max-w-6xl mx-auto">
       {/* Soft claymorphic hero card background */}
       <div className="clay-card-deep p-6 sm:p-8 lg:p-10 relative overflow-hidden">
         {/* Soft subtle glow accents behind content */}
@@ -18,36 +18,36 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartChallenge }) =>
           {/* Left Hero Column */}
           <div className="lg:col-span-7 text-center lg:text-left">
             {/* Small Eyebrow Label */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/80 shadow-xs mb-5">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/90 border border-slate-200/80 shadow-xs mb-4">
               <span className="font-mono-code text-[11px] font-semibold tracking-widest text-[#505f76] uppercase">
-                THE 60-DAY CHALLENGE
+                THE 60-DAY CODING CHALLENGE
               </span>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-[34px] sm:text-5xl lg:text-6xl font-extrabold text-[#1e293b] leading-[1.12] tracking-tight mb-5">
+            <h1 className="text-[32px] sm:text-5xl lg:text-6xl font-extrabold text-[#1e293b] leading-[1.12] tracking-tight mb-4">
               60 days.<br />
               One project.<br />
               <span className="text-[#4c5b71]">Every day.</span>
             </h1>
 
             {/* Supporting Text */}
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xs sm:max-w-md lg:max-w-lg mx-auto lg:mx-0 mb-7">
-              Commit to daily creative work. Track your progress, prove your growth, and turn consistent coding into visible proof of work.
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xs sm:max-w-md lg:max-w-lg mx-auto lg:mx-0 mb-6">
+              Build something every day, prove your work publicly, and turn 60 days of consistency into a project you can actually show.
             </p>
 
             {/* Primary CTA */}
-            <div className="flex flex-col items-center lg:items-start gap-3">
+            <div className="flex flex-col items-center lg:items-start gap-2.5">
               <button
                 onClick={onStartChallenge}
-                className="w-full sm:w-auto clay-btn-primary px-7 py-3.5 rounded-full font-bold text-base flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full sm:w-auto clay-btn-primary px-8 py-3.5 rounded-full font-bold text-base flex items-center justify-center gap-2 group cursor-pointer active:scale-98 transition-all"
               >
                 <span>Start Your Challenge</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
 
               <p className="text-[11px] font-mono-code text-slate-400 mt-1">
-                ⚡ Built for Indian college students
+                Built for Indian college students
               </p>
             </div>
           </div>
