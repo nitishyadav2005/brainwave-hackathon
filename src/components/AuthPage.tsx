@@ -136,7 +136,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
     <div className="min-h-screen bg-[#f4f6f8] text-[#1e293b] flex flex-col items-center justify-between font-sans selection:bg-[#4c5b71]/15">
       {/* AUTH HEADER */}
       <header className="w-full bg-[#f4f6f8]/90 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-40">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="w-full max-w-md lg:max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => {
               if (mode === 'select') {
@@ -181,7 +181,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
       )}
 
       {/* MAIN CONTAINER */}
-      <main className="w-full max-w-md px-4 py-6 flex-1 flex flex-col justify-center">
+      <main className="w-full max-w-md lg:max-w-xl px-4 py-6 flex-1 flex flex-col justify-center mx-auto">
         {/* OPTION SELECTOR VIEW */}
         {mode === 'select' && (
           <div className="space-y-6 animate-in fade-in duration-200">

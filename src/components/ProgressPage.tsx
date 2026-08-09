@@ -31,8 +31,8 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({ user, onNavigate }) 
   return (
     <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-36 selection:bg-[#4c5b71]/15 overflow-x-hidden">
       {/* HEADER */}
-      <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4">
-        <div className="max-w-md mx-auto h-full flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md lg:max-w-4xl mx-auto h-full flex items-center justify-between">
           <button
             onClick={() => onNavigate('/dashboard')}
             className="flex items-center gap-1.5 text-xs font-bold text-[#4c5b71] hover:text-[#38485d] transition-colors cursor-pointer"
@@ -46,7 +46,7 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({ user, onNavigate }) 
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className="max-w-md mx-auto px-4 pt-5 space-y-5">
+      <main className="w-full max-w-md lg:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 space-y-5">
         {/* OVERVIEW METRICS CARD */}
         <section className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 space-y-4">
           <div className="flex items-center justify-between">
@@ -187,7 +187,7 @@ export const ProgressPage: React.FC<ProgressPageProps> = ({ user, onNavigate }) 
       </main>
 
       {/* FIXED BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">
         {/* HOME */}
         <button
           onClick={() => onNavigate('/dashboard')}

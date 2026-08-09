@@ -12,6 +12,7 @@ import {
   User,
   GraduationCap,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { getEffectiveUserProgress } from '../utils/userProgress';
@@ -43,8 +44,9 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
   });
   const [reflectionSaved, setReflectionSaved] = useState(false);
 
-  // Share button state
+  // Share and Download state
   const [shareCopied, setShareCopied] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Auto-print effect when requested from preview modal
   useEffect(() => {
@@ -52,8 +54,8 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
       if (sessionStorage.getItem('abtalks_auto_print') === 'true') {
         sessionStorage.removeItem('abtalks_auto_print');
         const timer = setTimeout(() => {
-          window.print();
-        }, 400);
+          handleDownload();
+        }, 500);
         return () => clearTimeout(timer);
       }
     }
@@ -75,8 +77,31 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
     }
   };
 
-  const handleDownload = () => {
-    window.print();
+  const handleDownload = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const reportElement = document.getElementById('report-container') || document.querySelector('.print-container');
+      if (reportElement && typeof window !== 'undefined') {
+        const html2pdfModule = await import('html2pdf.js');
+        const html2pdf = (html2pdfModule.default || html2pdfModule) as any;
+        const opt = {
+          margin: [0.3, 0.3, 0.3, 0.3],
+          filename: `ABTalks_Report_0${report.id}_${studentName.replace(/\s+/g, '_')}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        await html2pdf().set(opt).from(reportElement as HTMLElement).save();
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.warn('PDF download fallback to print:', err);
+      window.print();
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const handleShare = async () => {
@@ -170,7 +195,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
       `}</style>
 
       {/* TOP STICKY HEADER (NO-PRINT) */}
-      <header className="no-print sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center justify-between max-w-md mx-auto shadow-xs">
+      <header className="no-print sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center justify-between max-w-md md:max-w-3xl mx-auto shadow-xs">
         <button
           onClick={() => onNavigate('/dashboard')}
           className="flex items-center gap-1.5 text-xs font-bold text-[#4c5b71] hover:text-[#191c1e] transition-colors cursor-pointer py-1.5 px-2 -ml-2 rounded-lg hover:bg-slate-100 min-h-[44px]"
@@ -187,15 +212,16 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
 
         <button
           onClick={handleDownload}
-          className="p-2 text-slate-600 hover:text-[#191c1e] rounded-lg hover:bg-slate-100 transition-colors cursor-pointer min-h-[44px] flex items-center justify-center"
+          disabled={isDownloading}
+          className="p-2 text-slate-600 hover:text-[#191c1e] rounded-lg hover:bg-slate-100 transition-colors cursor-pointer min-h-[44px] flex items-center justify-center disabled:opacity-50"
           title="Print or Save PDF"
         >
-          <Download className="w-4 h-4" />
+          {isDownloading ? <Loader2 className="w-4 h-4 animate-spin text-[#4c5b71]" /> : <Download className="w-4 h-4" />}
         </button>
       </header>
 
       {/* MAIN REPORT CONTAINER */}
-      <main className="max-w-md mx-auto px-4 pt-5 space-y-5 print-container">
+      <main id="report-container" className="max-w-md md:max-w-3xl mx-auto px-4 pt-5 space-y-5 print-container">
         
         {/* DOCUMENT HEADER / BRANDING */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4 print-card">
@@ -465,10 +491,20 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
           <button
             type="button"
             onClick={handleDownload}
-            className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] min-h-[44px]"
+            disabled={isDownloading}
+            className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] min-h-[44px] disabled:opacity-75"
           >
-            <Download className="w-4 h-4" />
-            <span>Download Report ↓</span>
+            {isDownloading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Downloading PDF Report...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                <span>Download Report ↓</span>
+              </>
+            )}
           </button>
 
           {/* Share Report Secondary Action */}

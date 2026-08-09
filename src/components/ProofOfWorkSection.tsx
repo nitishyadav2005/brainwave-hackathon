@@ -3,7 +3,7 @@ import { Github, Linkedin, ExternalLink, ShieldCheck } from 'lucide-react';
 
 export const ProofOfWorkSection: React.FC = () => {
   return (
-    <section id="proof-of-work" className="px-4 py-6 max-w-md md:max-w-2xl mx-auto">
+    <section id="proof-of-work" className="w-full max-w-md md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       <div className="text-center mb-6">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-2">
           <ShieldCheck className="w-3.5 h-3.5 text-[#4c5b71]" />

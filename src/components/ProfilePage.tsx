@@ -77,8 +77,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   return (
     <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-36 selection:bg-[#4c5b71]/15 overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4">
-        <div className="max-w-md mx-auto h-full flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md lg:max-w-3xl mx-auto h-full flex items-center justify-between">
           <button
             onClick={() => onNavigate('/dashboard')}
             className="flex items-center gap-1.5 text-xs font-bold text-[#4c5b71] hover:text-[#38485d] transition-colors cursor-pointer"
@@ -91,7 +91,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 pt-5 space-y-5">
+      <main className="w-full max-w-md lg:max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 space-y-5">
         {saveSuccessMsg && (
           <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-xl flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -284,7 +284,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       </main>
 
       {/* FIXED BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">
         {/* HOME */}
         <button
           onClick={() => onNavigate('/dashboard')}

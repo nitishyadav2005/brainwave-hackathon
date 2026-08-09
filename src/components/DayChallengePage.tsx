@@ -197,8 +197,8 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
   return (
     <div className="min-h-screen bg-[#f8f9fb] text-[#191c1e] font-sans pb-36 selection:bg-[#4c5b71]/15 overflow-x-hidden">
       {/* 1. TOP HEADER */}
-      <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4">
-        <div className="max-w-md mx-auto h-full flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full h-14 bg-[#f8f9fb]/90 backdrop-blur-md border-b border-slate-200/60 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-6xl mx-auto h-full flex items-center justify-between">
           <button
             onClick={() => onNavigate('/dashboard')}
             className="flex items-center gap-1 text-xs font-bold text-[#4c5b71] hover:text-[#38485d] transition-colors cursor-pointer"
@@ -218,7 +218,7 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className="max-w-md mx-auto px-4 pt-5 space-y-5">
+      <main className="w-full max-w-md lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 space-y-5">
         
         {/* COMPLETED DAY STATE (IF ALREADY SUBMITTED) */}
         {isSubmitted ? (
@@ -267,8 +267,10 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
             </button>
           </div>
         ) : (
-          <>
-            {/* 2. MISSION HEADER */}
+          <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-8 lg:items-start space-y-5 lg:space-y-0">
+            {/* LEFT COLUMN: GUIDANCE & CHECKLIST */}
+            <div className="lg:col-span-7 space-y-5">
+              {/* 2. MISSION HEADER */}
             <section className="bg-white rounded-2xl p-5 shadow-sm border-2 border-[#4c5b71]/20 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-mono-code text-[11px] font-bold text-[#4c5b71] tracking-wider uppercase">
@@ -461,7 +463,10 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                 })}
               </div>
             </section>
+          </div>
 
+          {/* RIGHT COLUMN: PROOF SUBMISSION FORM & PREVIEW */}
+          <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-20">
             {/* 6. PROOF OF WORK */}
             <section className="space-y-3 pt-1">
               <div>
@@ -616,43 +621,6 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
               </div>
             </section>
 
-            {/* 7. PROOF PREVIEW */}
-            <section className="space-y-2 pt-1">
-              <div>
-                <h2 className="text-base font-bold text-[#191c1e]">
-                  Proof Preview
-                </h2>
-                <p className="text-xs text-slate-500 font-medium">
-                  This is how Day {dayNumber} will appear on your public journey.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-4 border-2 border-dashed border-slate-200 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono-code text-[11px] font-extrabold text-[#4c5b71]">
-                    DAY {dayNumber}
-                  </span>
-                  <span className="font-mono-code text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
-                    <Flame className="w-3 h-3 fill-amber-500 text-amber-500" />
-                    {dayNumber} DAY STREAK
-                  </span>
-                </div>
-
-                <p className="text-xs font-bold text-[#191c1e]">
-                  Build something useful with an API
-                </p>
-
-                <div className="flex items-center gap-3 pt-1 text-[11px] font-mono-code font-bold">
-                  <span className={githubVerified ? 'text-emerald-700 flex items-center gap-1' : 'text-slate-400'}>
-                    {githubVerified ? '✓' : '○'} GitHub
-                  </span>
-                  <span className={linkedinVerified ? 'text-emerald-700 flex items-center gap-1' : 'text-slate-400'}>
-                    {linkedinVerified ? '✓' : '○'} LinkedIn
-                  </span>
-                </div>
-              </div>
-            </section>
-
             {/* 8. SUBMISSION PROGRESS INDICATOR */}
             <section className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs space-y-2.5">
               <div className="flex items-center justify-between">
@@ -719,13 +687,14 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
                 <span>Submit Day {dayNumber} →</span>
               </button>
             </section>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
       </main>
 
-      {/* 10. FIXED BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">
+      {/* 10. FIXED BOTTOM NAVIGATION (Hidden on Desktop) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">
         {/* HOME */}
         <button
           onClick={() => onNavigate('/dashboard')}

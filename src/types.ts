@@ -25,6 +25,10 @@ export interface UserProfile {
   completedDays?: number;
   day12Completed?: boolean;
   missedYesterday?: boolean;
+  streakSaversTotal?: number;
+  streakSaversUsed?: number;
+  streakSaversRemaining?: number;
+  streakSaverProtectedYesterday?: boolean;
   isAuthenticated: boolean;
 }
 

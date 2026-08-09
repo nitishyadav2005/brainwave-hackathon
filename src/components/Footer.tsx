@@ -20,7 +20,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
   return (
     <footer className="border-t border-slate-200/80 bg-white py-8 px-4 mt-8">
-      <div className="max-w-md md:max-w-2xl mx-auto flex flex-col items-center justify-center text-center gap-3">
+      <div className="w-full max-w-md md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center gap-3">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-[#4c5b71] text-white flex items-center justify-center font-bold text-xs">
             AB

@@ -7,7 +7,7 @@ interface FinalCTASectionProps {
 
 export const FinalCTASection: React.FC<FinalCTASectionProps> = ({ onStartChallenge }) => {
   return (
-    <section className="px-4 py-8 max-w-md md:max-w-2xl mx-auto">
+    <section className="w-full max-w-md md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="clay-card-deep p-6 sm:p-8 text-center relative overflow-hidden">
         {/* Soft decorative background circles */}
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-slate-200 rounded-full blur-2xl opacity-40" />
