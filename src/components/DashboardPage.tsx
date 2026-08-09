@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
-import { getEffectiveUserProgress } from '../utils/userProgress';
+import { getEffectiveUserProgress, getExtensionInfo } from '../utils/userProgress';
 import {
   Flame,
   Check,
@@ -137,6 +137,48 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
     setShowSavedSuccessToast(true);
   };
 
+  // 5-Day Extension State & Handlers
+  const [extensionInfo, setExtensionInfo] = useState(() => getExtensionInfo(user));
+  const [dismissedExtensionPrompt, setDismissedExtensionPrompt] = useState(false);
+
+  const handleActivateExtension = () => {
+    const now = new Date();
+    const endDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
+    const startDateStr = now.toISOString();
+    const endDateStr = endDate.toISOString();
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('abtalks_extension_used', 'true');
+      localStorage.setItem('abtalks_extension_start_date', startDateStr);
+      localStorage.setItem('abtalks_extension_end_date', endDateStr);
+      localStorage.setItem('abtalks_challenge_status', 'extension');
+
+      try {
+        const savedUser = localStorage.getItem('abtalks_user');
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          parsed.extensionUsed = true;
+          parsed.extensionStartDate = startDateStr;
+          parsed.extensionEndDate = endDateStr;
+          parsed.challengeStatus = 'extension';
+          localStorage.setItem('abtalks_user', JSON.stringify(parsed));
+        }
+      } catch (e) {
+        console.warn('Error saving extension to user:', e);
+      }
+    }
+
+    setExtensionInfo({
+      extensionUsed: true,
+      extensionTotalDays: 5,
+      extensionDaysRemaining: 5,
+      extensionStartDate: startDateStr,
+      extensionEndDate: endDateStr,
+      challengeStatus: 'extension',
+      isExpired: false,
+    });
+  };
+
   // Derived variables based on current user (ensuring clean first name "Nitish", no surname)
   const name = formatFirstName(user?.name);
 
@@ -152,6 +194,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const totalDays = 60;
   const progressDay = isFirstDay ? 0 : currentDay;
   const completionPercentage = isFirstDay ? 0 : progress.completionPercentage;
+
+  // Eligible for 5-Day Extension if at/past Day 60, completed < 60 days, and extension not yet used
+  const isEligibleForExtension =
+    currentDay >= 60 && completedDays < 60 && !extensionInfo.extensionUsed;
 
   const scrollToJourney = () => {
     if (journeyRef.current) {
@@ -428,6 +474,44 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
           {/* MAIN CONTENT COLUMN (Today's Mission & Journey Grid) */}
           <div className="lg:col-span-8 space-y-5 lg:order-1">
+            {/* 5-DAY FINISH EXTENSION PROMPT (When reached Day 60 with incomplete days) */}
+            {isEligibleForExtension && !dismissedExtensionPrompt && (
+              <section className="bg-gradient-to-br from-slate-900 via-[#1e293b] to-slate-900 rounded-2xl p-5 shadow-sm text-white space-y-3 relative overflow-hidden border border-slate-800 animate-in fade-in">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="font-mono-code text-[10px] font-extrabold uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-md tracking-wider">
+                    ALMOST THERE
+                  </span>
+                  <span className="font-mono-code text-xs text-slate-300 font-bold">
+                    {completedDays} / 60 DAYS COMPLETED
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <h3 className="text-lg font-extrabold text-white leading-snug">
+                    Take 5 extra days to finish what you started.
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                    You've built most of the way through your 60-day challenge! Your progress and completed projects are safe. Use your one-time 5-day extension to finish your remaining work.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
+                  <button
+                    onClick={handleActivateExtension}
+                    className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] active:scale-[0.98]"
+                  >
+                    <span>Use 5-Day Extension →</span>
+                  </button>
+                  <button
+                    onClick={() => setDismissedExtensionPrompt(true)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer min-h-[40px]"
+                  >
+                    Not Now
+                  </button>
+                </div>
+              </section>
+            )}
+
             {/* 4. TODAY'S MISSION (PRIMARY ACTION) */}
             <section className="bg-white rounded-2xl p-5 shadow-sm border-2 border-[#4c5b71]/20 space-y-4 relative">
           {/* Header Row */}
@@ -488,6 +572,80 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
         {/* 5. JOURNEY */}
         <section ref={journeyRef} className="space-y-3 pt-2">
+          {/* ACTIVE 5-DAY EXTENSION BANNER */}
+          {extensionInfo.extensionUsed && extensionInfo.challengeStatus === 'extension' && !extensionInfo.isExpired && (
+            <div className="bg-amber-50/95 border border-amber-200/90 rounded-2xl p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-sm">
+                  ⏳
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono-code text-[10px] font-bold text-amber-800 uppercase tracking-wider bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
+                      FINAL 5 DAYS
+                    </span>
+                    <span className="font-bold text-amber-950 text-xs">
+                      {extensionInfo.extensionDaysRemaining} DAY{extensionInfo.extensionDaysRemaining !== 1 ? 'S' : ''} LEFT
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amber-900/80 font-medium mt-0.5">
+                    5-Day Finish Extension active • Complete your remaining challenge days!
+                  </p>
+                </div>
+              </div>
+              <div className="font-mono-code text-xs font-bold text-amber-900 bg-amber-200/60 px-3 py-1.5 rounded-xl border border-amber-300/80 self-start sm:self-center">
+                {completedDays} / 60 Completed
+              </div>
+            </div>
+          )}
+
+          {/* CHALLENGE COMPLETED BANNER */}
+          {completedDays >= 60 && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 font-extrabold text-base shrink-0">
+                  🎉
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono-code text-[10px] font-extrabold text-emerald-800 uppercase bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
+                      CHALLENGE COMPLETE
+                    </span>
+                    <span className="font-mono-code text-[10px] font-bold text-emerald-700">
+                      60 / 60 DAYS • 100%
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-950 font-bold mt-0.5">
+                    60 days. You finished what you started.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate('/progress')}
+                className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
+              >
+                View Final Certificate →
+              </button>
+            </div>
+          )}
+
+          {/* EXTENSION EXPIRED BANNER */}
+          {extensionInfo.isExpired && completedDays < 60 && (
+            <div className="bg-slate-100 border border-slate-300 rounded-2xl p-4 shadow-2xs space-y-1.5 animate-in fade-in">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-mono-code text-[10px] font-extrabold text-slate-700 uppercase bg-slate-200 px-2 py-0.5 rounded border border-slate-300">
+                  CHALLENGE WINDOW COMPLETE
+                </span>
+                <span className="text-xs font-bold text-slate-800">
+                  {completedDays} / 60 Days Completed
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                You made it further than you started! Your completed projects, GitHub submissions, progress reports, and badges remain saved and accessible anytime.
+              </p>
+            </div>
+          )}
+
           {/* Section Header */}
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-[#191c1e]">

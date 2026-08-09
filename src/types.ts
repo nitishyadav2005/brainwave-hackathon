@@ -29,6 +29,12 @@ export interface UserProfile {
   streakSaversUsed?: number;
   streakSaversRemaining?: number;
   streakSaverProtectedYesterday?: boolean;
+  extensionUsed?: boolean;
+  extensionTotalDays?: number;
+  extensionDaysRemaining?: number;
+  extensionStartDate?: string | null;
+  extensionEndDate?: string | null;
+  challengeStatus?: 'active' | 'extension' | 'completed' | 'extension_expired';
   isAuthenticated: boolean;
 }
 

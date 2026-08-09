@@ -14,7 +14,7 @@ import { ProgressPage } from './components/ProgressPage';
 import { ReportPage } from './components/ReportPage';
 import { UserProfile } from './types';
 import { formatFirstName } from './utils/nameUtils';
-import { getEffectiveUserProgress } from './utils/userProgress';
+import { getEffectiveUserProgress, getExtensionInfo } from './utils/userProgress';
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
@@ -28,9 +28,13 @@ export default function App() {
       if (parsed) {
         parsed.name = formatFirstName(parsed.name);
         const progress = getEffectiveUserProgress(parsed);
+        const extension = getExtensionInfo(parsed);
         parsed.currentDay = progress.currentDay;
         parsed.streak = progress.streakDays;
         parsed.completedDays = progress.completedDays;
+        parsed.extensionUsed = extension.extensionUsed;
+        parsed.extensionDaysRemaining = extension.extensionDaysRemaining;
+        parsed.challengeStatus = extension.challengeStatus;
         localStorage.setItem('abtalks_user', JSON.stringify(parsed));
       }
       return parsed;

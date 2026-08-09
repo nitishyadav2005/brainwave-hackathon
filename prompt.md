@@ -300,4 +300,102 @@ ADDITIVE FEATURE: ABTALKS PROOF CARD & DASHBOARD CONNECTION
    - Removed daily Proof Card block to align strictly with the 10-Day Project Progress Report architecture.
 ```
 
+---
+
+## 16. Desktop Responsive Layout & Proof Preview Removal
+
+```text
+DESKTOP RESPONSIVE LAYOUT & PROOF PREVIEW REMOVAL
+
+1. Enhanced responsive layout across Dashboard (`/dashboard`), Day Challenge (`/day/:id`), Progress (`/progress`), Profile (`/profile`), and Auth (`/auth`) pages:
+   - Header: Added desktop navigation links (Home, Challenge, Progress, Profile) on `lg:` screens.
+   - Layout: Expanded container widths on large screens (`lg:max-w-6xl`) with 2-column grid layout for Dashboard and Day Challenge.
+   - Bottom Navigation: Fixed bottom bar is hidden on desktop screens (`lg:hidden`).
+2. Removed "Proof Preview" section from `DayChallengePage.tsx` per user request.
+```
+
+---
+
+## 17. Streak Saver Feature Implementation
+
+```text
+STREAK SAVER FEATURE
+
+1. Concept:
+   - Every student gets 3 Streak Savers for the 60-day challenge.
+   - Can be used when a day is missed to protect the active streak.
+   - Total limit: 3 Streak Savers for the entire challenge.
+2. State Management:
+   - Initial values: `streakSaversTotal: 3`, `streakSaversUsed: 0`, `streakSaversRemaining: 3`.
+   - Persisted in localStorage (`abtalks_streak_savers_used`, `abtalks_streak_savers_remaining`, `abtalks_streak_saver_protected_yesterday`).
+3. Missed-Day Behavior:
+   - When yesterday is missed and `streakSaversRemaining > 0`:
+     - Modify streak card status to "STREAK AT RISK".
+     - Displays "You missed yesterday."
+     - Shows compact action: 🛡 Streak Saver ("Protect your streak • X of 3 remaining").
+     - Button: "Use Streak Saver →".
+   - When student clicks "Use Streak Saver →":
+     - Opens confirmation modal ("Protect your streak?", "You have X Streak Savers for your entire 60-day challenge.", "Use one to keep your current streak alive.").
+     - Buttons: "Use Streak Saver", "Not Now".
+   - Upon confirmation:
+     - `streakSaversUsed` increases by 1, `streakSaversRemaining` decreases by 1.
+     - Active streak remains unbroken.
+     - Displays success toast ("Streak saved! 🔥", "Your 11-day streak is still alive.").
+     - Streak card returns to "11 Day ACTIVE STREAK" with updated remaining saver count.
+   - When all 3 Streak Savers are used (`remaining = 0`) and another day is missed:
+     - Shows "STREAK BROKEN", "Your Streak Savers are all used. Your challenge is still going. Start building again today."
+     - Button: "Continue Challenge →" (does NOT lock the challenge or reset total days).
+```
+
+---
+
+## 18. Custom Streak Saver Icon Enhancement
+
+```text
+CUSTOM STREAK SAVER ICON
+
+1. Created custom SVG component `StreakSaverIcon`:
+   - Polished hybrid icon combining a protection shield with an inner spark/flame element.
+   - Clean, minimal, modern, and perfectly aligned with ABTalks design language.
+2. Replaced standard shield icons in streak card indicator, risk action banner, and confirmation modal.
+```
+
+---
+
+## 19. Continuous Prompt Logging Directive
+
+```text
+CONTINUOUS PROMPT LOGGING
+
+1. User instruction: "prompt.md ko bhi update karte raho sath me" (Keep updating prompt.md along with all chat changes).
+2. All subsequent prompt specifications and code updates are to be recorded in `prompt.md`.
+```
+
+---
+
+## 20. 5-Day Finish Extension Feature
+
+```text
+5-DAY FINISH EXTENSION FEATURE
+
+1. Core Concept:
+   - ABTalks is a 60-Day Coding Challenge.
+   - If a student reaches Day 60 but has NOT completed all required challenge days/projects, they receive ONE additional 5-day extension period to finish their challenge.
+   - Supportive, finish-line focus ("Take 5 extra days to finish what you started").
+   - Maximum extension: 1 use per student (5 days total). No infinite extensions.
+
+2. Eligibility & State Management:
+   - Reaches Day 60 with `completedDays < 60` and `!extensionUsed`.
+   - Persisted in localStorage (`abtalks_extension_used`, `abtalks_extension_start_date`, `abtalks_extension_end_date`, `abtalks_challenge_status`).
+   - Fields in UserProfile: `extensionUsed`, `extensionTotalDays`, `extensionDaysRemaining`, `extensionStartDate`, `extensionEndDate`, `challengeStatus`.
+
+3. User Interface & Experience:
+   - Day 60 Prompt Banner ("ALMOST THERE", "You've built most of the way. Take 5 extra days to finish what you started.", Primary CTA: "Use 5-Day Extension →", Secondary option: "Not Now").
+   - Active Extension Indicator: Compact banner above Journey Grid ("FINAL 5 DAYS", "5 DAYS LEFT", "5-Day Finish Extension active").
+   - Challenge Completed: When 60/60 days are completed during extension, displays "🎉 CHALLENGE COMPLETE", "60 days. You finished what you started."
+   - Challenge Window Expired: If 5 days elapse with incomplete days, displays supportive window completion card without locking completed work or resetting user progress.
+   - 60-Day Journey Grid: Preserved strictly as 60 days (no extra days 61-65 added to grid).
+```
+
+
 
