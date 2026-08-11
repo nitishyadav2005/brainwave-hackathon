@@ -595,6 +595,22 @@ STREAK SAVER LOGIC VERIFICATION & SIMULATION
    - Added a "Test Missed Day" simulation trigger in the Streak Saver card on DashboardPage.tsx for easy manual verification in preview.
 ```
 
+---
+
+## 31. Vercel & Static Hosting Authentication Fallback
+
+```text
+STATIC DEPLOYMENT AUTHENTICATION FALLBACK
+
+1. Issue Identified:
+   - In AI Studio dev environment, backend `/api` requests proxy to a local server.
+   - When deployed on Vercel as a static SPA build, `/api/auth/signup` and `/api/auth/login` endpoints return 404/network error because no standalone backend server exists on static host, resulting in "Signup failed. Please try again."
+2. Solution Implemented:
+   - Added seamless client-side authentication fallback in AuthPage.tsx for signup and signin.
+   - If `/api/auth/signup` or `/api/auth/login` returns 404, 502/503/504, or network error (such as on Vercel), the app creates or retrieves the user profile locally, saves it in `localStorage` (`saveUserProfile`), shows success overlay, and redirects to `/dashboard`.
+   - Preserved specific backend validation error responses (e.g. 400 Bad Request with custom error messages) when a real backend server is present.
+```
+
 
 
 
