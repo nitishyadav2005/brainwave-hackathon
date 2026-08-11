@@ -1,0 +1,16 @@
+/app/applet/backend/src/main/java/com/abtalks/dto/AuthResponse.java
+/app/applet/backend/src/main/java/com/abtalks/dto/package-info.java
+/app/applet/backend/src/main/java/com/abtalks/config/CorsConfig.java
+/app/applet/backend/src/main/java/com/abtalks/controller/AuthController.java
+/app/applet/backend/src/main/java/com/abtalks/AbTalksApplication.java
+/app/applet/backend/src/main/java/com/abtalks/repository/UserRepository.java
+/app/applet/backend/src/main/java/com/abtalks/config/SecurityConfig.java
+/app/applet/backend/src/main/java/com/abtalks/dto/SignupRequest.java
+/app/applet/backend/src/main/java/com/abtalks/service/AuthService.java
+/app/applet/backend/src/main/java/com/abtalks/dto/UserDto.java
+/app/applet/backend/src/main/java/com/abtalks/dto/LoginRequest.java
+/app/applet/backend/src/main/java/com/abtalks/repository/package-info.java
+/app/applet/backend/src/main/java/com/abtalks/model/package-info.java
+/app/applet/backend/src/main/java/com/abtalks/model/User.java
+/app/applet/backend/src/main/java/com/abtalks/service/package-info.java
+/app/applet/backend/src/main/java/com/abtalks/controller/HealthController.java

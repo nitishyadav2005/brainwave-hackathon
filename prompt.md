@@ -460,5 +460,141 @@ LANDING PAGE STREAMLINING UPON USER FEEDBACK
 4. Replaced certificate recipient placeholder name with "XYZ" in CertificateSection.tsx.
 ```
 
+---
+
+## 24. Step 1 & Step 2: Java Spring Boot Backend Foundation & User Authentication
+
+```text
+ABTALKS — STEP 1 & STEP 2: JAVA SPRING BOOT BACKEND & AUTHENTICATION
+
+1. Backend Foundation:
+   - Created Java 17 / Spring Boot 3.2.x Maven application structure under `backend/`.
+   - Packages: `com.abtalks` (controller, service, repository, model, dto, config).
+   - Created `AbTalksApplication.java` entry point and `/api/health` health check controller.
+   - Configured `CorsConfig.java` supporting development origins `http://localhost:3000` & `http://localhost:5173`.
+   - Configured `SecurityConfig.java` with Spring Security and `BCryptPasswordEncoder`.
+
+2. User Model & Data Persistence:
+   - Created `User.java` JPA Entity mapped to `users` table with fields `id`, `name`, `email` (unique), `password` (BCrypt hash), `college`, `track`, `createdAt`.
+   - Created `UserRepository.java` with `findByEmail` and `existsByEmail` queries.
+   - Configured file-based H2 database (`jdbc:h2:file:./data/abtalks`) in `application.properties` to ensure persistent storage across server restarts, with `/h2-console` enabled.
+
+3. Authentication API Endpoints & DTOs:
+   - DTOs: `SignupRequest`, `LoginRequest`, `UserDto`, `AuthResponse`.
+   - `AuthService.java` handling user signup, email uniqueness validation, BCrypt password hashing/verification, and login mapping.
+   - `AuthController.java` serving `POST /api/auth/signup` and `POST /api/auth/login`.
+
+4. Frontend Connection & Project Cleanup:
+   - Removed unreferenced unused section files (`FinalCTASection.tsx`, `HowItWorksSection.tsx`, `JourneyMomentumSection.tsx`).
+   - Added `/api` proxy in `vite.config.ts`.
+   - Connected `AuthPage.tsx` Sign Up and Sign In forms to call backend REST endpoints (`/api/auth/signup` and `/api/auth/login`).
+   - New users initialize at Day 1 (`currentDay: 1`, `completedDays: 0`, `streak: 0`).
+```
+
+---
+
+## 25. ABTalks — Project Audit & Safe Cleanup Pass
+
+```text
+ABTALKS — PROJECT AUDIT & SAFE CLEANUP
+
+1. Audit & Verification:
+   - Audited full repository structure across frontend and backend.
+   - Verified all React UI components (`AuthPage`, `DashboardPage`, `DayChallengePage`, `ProgressPage`, `ProfilePage`, `ReportPage`, `ProofCard`, `TrackModal`, `CertificateSection`, etc.) are actively imported and rendered.
+   - Verified Java Spring Boot backend (`/backend`) serves `/api/health`, `/api/auth/signup`, and `/api/auth/login` on port 8081 with file-based H2 database (`./data/abtalks`).
+2. File & Dependency Cleanup:
+   - Removed `/bun.lock` (obsolete lockfile superseded by npm `package.json`).
+   - Removed unused npm dependencies from `package.json`: `@google/genai`, `express`, `@types/express`, `dotenv`, `tsx`, `esbuild`.
+   - Cleaned `package.json` clean script (`"clean": "rm -rf dist"`).
+3. Health & Auth Verification:
+   - Tested `GET /api/health` -> `{"message":"ABTalks backend is running","status":"ok"}`.
+   - Tested `POST /api/auth/signup` -> 201 Created.
+   - Tested `POST /api/auth/login` -> 200 OK.
+```
+
+---
+
+## 26. ABTalks — Journey Grid Responsive Polish & Certificate Milestones
+
+```text
+ABTALKS — JOURNEY GRID RESPONSIVE POLISH & CERTIFICATE MILESTONES
+
+1. Desktop / Laptop Box Scaling:
+   - Constrained Journey Grid card maximum width (`max-w-full lg:max-w-[620px] xl:max-w-[660px]`) so day tiles maintain a compact, balanced square aspect (~70–85px) on desktop instead of stretching excessively.
+   - Kept the 6-column grid layout consistent across all viewports (320px–1440px+).
+
+2. Certificate Milestone Markers (Days 10, 20, 30, 40, 50, 60):
+   - Embedded locked, upcoming, and unlocked certificate milestone boxes directly within the 60-day Journey Grid.
+   - Locked Certificate: Features a muted slate background, dashed border, Lock icon, day number, and uppercase "CERT" label.
+   - Upcoming Milestone (e.g. Day 10 at 9 completed days): Highlighted with warm amber accent and countdown badge ("1d away").
+   - Unlocked Certificate: Raised amber gradient tile with Award/Trophy icon and interactive modal trigger for viewing/downloading progress certificates.
+
+3. Responsive Grid Legend:
+   - Added compact legend beneath the grid highlighting Completed, Current Day, Upcoming, Locked Cert, and Unlocked Cert.
+```
+
+---
+
+## 27. Journey Grid Milestone Box Clean-Up
+
+```text
+JOURNEY GRID MILESTONE BOXES CLEAN-UP
+
+1. Removed "DAYS AWAY" / "X DAYS AWAY" text from all certificate milestone boxes (Days 10, 20, 30, 40, 50, and 60).
+2. Milestone boxes simplified to present cleanly:
+   - Unlocked: Award icon + Day number (e.g. 🏅 10)
+   - Locked: Lock icon + Day number (e.g. 🔒 20)
+3. Maintained existing locked and unlocked styling, normal day boxes (1-9, 11-19, etc.), grid layout, legend, and bottom certificate reminder.
+```
+
+---
+
+## 28. Dashboard Recent Badges Removal
+
+```text
+REMOVE RECENT BADGES SECTION
+
+1. Removed the "Recent Badges" section card from both mobile and desktop layouts in DashboardPage.tsx.
+```
+
+---
+
+## 29. Profile Picture Upload & Management System
+
+```text
+PROFILE PICTURE UPLOAD / CHANGE FEATURE
+
+1. Profile Picture Upload & Preview:
+   - Registered users can upload a custom profile picture by clicking the avatar or "Edit Profile".
+   - Supports image formats: JPG, JPEG, PNG, WEBP with 5MB max size validation and friendly inline error dialogs.
+   - Circular preview modal with "Cancel" and "Save Photo" actions before persisting.
+2. Avatar Display & Fallbacks:
+   - Replaced default initial avatar ("N") with user's uploaded photo when present (object-fit: cover, perfectly circular, no distortion).
+   - Preserved initial fallback when no photo is uploaded.
+3. Change / Remove Photo Flow:
+   - Clicking existing photo presents options modal: "Change Profile Picture" or "Remove Profile Picture".
+   - Removing photo deletes uploaded picture and restores initial-based avatar.
+4. Persistence & Global Synchrony:
+   - Saved avatar in localStorage user profile system (saveUserProfile) so it persists across refreshes, navigation, and login sessions.
+   - Synchronized avatar across top navbar header, profile card, and Proof Card preview.
+```
+
+---
+
+## 30. Streak Saver Verification & Testing Simulation
+
+```text
+STREAK SAVER LOGIC VERIFICATION & SIMULATION
+
+1. Streak Logic Verification:
+   - Verified that skipping a day marks missedYesterday: true and puts streak at risk ("STREAK AT RISK").
+   - Using a Streak Saver (handleConfirmUseStreakSaver) decrements available savers, protects the active streak, and sets streakSaverProtectedYesterday: true.
+   - Submitting a challenge day after a protected missed day preserves the active streak counter (streak = prevStreak + 1).
+   - If a day is missed and NO Streak Saver is used, submitting a challenge resets current streak to 1.
+2. Test Simulator:
+   - Added a "Test Missed Day" simulation trigger in the Streak Saver card on DashboardPage.tsx for easy manual verification in preview.
+```
+
+
 
 

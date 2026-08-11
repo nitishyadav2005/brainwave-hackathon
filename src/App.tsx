@@ -14,7 +14,12 @@ import { ProgressPage } from './components/ProgressPage';
 import { ReportPage } from './components/ReportPage';
 import { UserProfile } from './types';
 import { formatFirstName } from './utils/nameUtils';
-import { getEffectiveUserProgress, getExtensionInfo } from './utils/userProgress';
+import {
+  getEffectiveUserProgress,
+  loadUserProfile,
+  saveUserProfile,
+  createNewUser,
+} from './utils/userProgress';
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
@@ -23,43 +28,36 @@ export default function App() {
 
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
-      const saved = localStorage.getItem('abtalks_user');
-      let parsed = saved ? JSON.parse(saved) : null;
-      if (!parsed) {
-        parsed = {
-          name: 'Nitish',
-          email: 'nitishyadav5098@gmail.com',
-          streak: 54,
-          completedDays: 54,
-          currentDay: 55,
-          isAuthenticated: true,
-        };
+      const loaded = loadUserProfile();
+      if (loaded) {
+        const emailKey = loaded.email?.toLowerCase().trim();
+        const hasSpecific = emailKey ? !!localStorage.getItem(`abtalks_user_${emailKey}`) : false;
+        if (!hasSpecific && (loaded.currentDay === 55 || loaded.completedDays === 54)) {
+          loaded.currentDay = 1;
+          loaded.completedDays = 0;
+          loaded.streak = 0;
+          loaded.challengeStatus = 'active';
+        }
+        loaded.name = formatFirstName(loaded.name);
+        saveUserProfile(loaded);
+        return loaded;
       }
-      if (parsed) {
-        parsed.name = formatFirstName(parsed.name);
-        parsed.streak = 54;
-        parsed.completedDays = 54;
-        parsed.currentDay = 55;
-        const progress = getEffectiveUserProgress(parsed);
-        const extension = getExtensionInfo(parsed);
-        parsed.currentDay = progress.currentDay;
-        parsed.streak = progress.streakDays;
-        parsed.completedDays = progress.completedDays;
-        parsed.extensionUsed = extension.extensionUsed;
-        parsed.extensionDaysRemaining = extension.extensionDaysRemaining;
-        parsed.challengeStatus = extension.challengeStatus;
-        localStorage.setItem('abtalks_user', JSON.stringify(parsed));
-      }
-      return parsed;
+
+      const defaultUser = createNewUser(
+        'Nitish',
+        'nitishyadav5098@gmail.com',
+        'ABES Engineering College',
+        'Full Stack Development'
+      );
+      saveUserProfile(defaultUser);
+      return defaultUser;
     } catch {
-      return {
-        name: 'Nitish',
-        email: 'nitishyadav5098@gmail.com',
-        streak: 54,
-        completedDays: 54,
-        currentDay: 55,
-        isAuthenticated: true,
-      };
+      return createNewUser(
+        'Nitish',
+        'nitishyadav5098@gmail.com',
+        'ABES Engineering College',
+        'Full Stack Development'
+      );
     }
   });
 

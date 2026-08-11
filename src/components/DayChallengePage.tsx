@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
+import { loadUserProfile, saveUserProfile } from '../utils/userProgress';
 import { ProofCard } from './ProofCard';
 
 interface DayChallengePageProps {
@@ -160,23 +161,49 @@ export const DayChallengePage: React.FC<DayChallengePageProps> = ({
     localStorage.setItem(storageKey, 'true');
     localStorage.setItem(legacyStorageKey, 'true');
     localStorage.setItem(submitFlagKey, 'true');
-    localStorage.setItem(`abtalks_day${dayNumber}_submitted_at`, new Date().toISOString());
+    const nowIso = new Date().toISOString();
+    localStorage.setItem(`abtalks_day${dayNumber}_submitted_at`, nowIso);
+    localStorage.setItem('abtalks_last_submission_date', nowIso);
+
+    // Check streak protection status
+    const isMissedYesterday = localStorage.getItem('abtalks_missed_yesterday') === 'true';
+    const isProtectedYesterday = localStorage.getItem('abtalks_streak_saver_protected_yesterday') === 'true';
+    const isStreakBroken = isMissedYesterday && !isProtectedYesterday;
+
+    // Reset state after submission
+    localStorage.setItem('abtalks_missed_yesterday', 'false');
+    localStorage.setItem('abtalks_streak_saver_protected_yesterday', 'false');
 
     try {
-      const savedUser = localStorage.getItem('abtalks_user');
-      const parsedUser = savedUser ? JSON.parse(savedUser) : {};
+      const parsedUser = loadUserProfile() || user || ({} as any);
+      const currentDayVal = parsedUser.currentDay ?? 1;
+      const nextDayVal = Math.min(60, Math.max(currentDayVal, dayNumber + 1));
+      const nextCompletedVal = Math.max(parsedUser.completedDays || 0, dayNumber);
+
+      let nextStreakVal: number;
+      if (isStreakBroken) {
+        nextStreakVal = 1; // Streak broken -> start fresh at 1
+      } else {
+        const prevStreak = parsedUser.streak || 0;
+        nextStreakVal = Math.max(prevStreak + 1, dayNumber);
+      }
+
       const updatedUser: UserProfile = {
+        ...parsedUser,
         name: formatFirstName(parsedUser.name),
         email: parsedUser.email || 'nitish@example.com',
         college: parsedUser.college || 'ABES Engineering College',
         track: parsedUser.track || 'Full Stack Development',
-        currentDay: Math.max(parsedUser.currentDay || 0, dayNumber + 1),
-        streak: Math.max(parsedUser.streak || 0, dayNumber),
-        completedDays: Math.max(parsedUser.completedDays || 0, dayNumber),
-        day12Completed: true,
+        currentDay: nextDayVal,
+        streak: nextStreakVal,
+        completedDays: nextCompletedVal,
+        missedYesterday: false,
+        streakSaverProtectedYesterday: false,
+        projectCompleted: nextCompletedVal >= 60,
+        challengeStatus: nextCompletedVal >= 60 ? 'completed' : 'active',
         isAuthenticated: true,
       };
-      localStorage.setItem('abtalks_user', JSON.stringify(updatedUser));
+      saveUserProfile(updatedUser);
       if (onUpdateUser) {
         onUpdateUser(updatedUser);
       }

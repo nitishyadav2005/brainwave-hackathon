@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Sparkles, Lock, Mail, User, GraduationCap, Code2, AlertCircle } from 'lucide-react';
 import { AuthMode, UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
+import { createNewUser, loadUserProfile, saveUserProfile } from '../utils/userProgress';
 
 interface AuthPageProps {
   onNavigate: (route: string) => void;
@@ -34,7 +35,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
     return /^\S+@\S+\.\S+$/.test(email);
   };
 
-  const handleSignInSubmit = (e: React.FormEvent) => {
+  const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
 
@@ -56,24 +57,64 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
     setErrors({});
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: signInEmail.trim(),
+          password: signInPassword,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success && data?.user) {
+        const emailClean = data.user.email.toLowerCase().trim();
+        let userProfile = loadUserProfile(emailClean);
+
+        if (!userProfile) {
+          userProfile = {
+            name: formatFirstName(data.user.name),
+            email: data.user.email,
+            college: data.user.college || 'ABES Engineering College',
+            track: data.user.track || 'Full Stack Development',
+            currentDay: 1,
+            completedDays: 0,
+            streak: 0,
+            challengeStatus: 'active',
+            isAuthenticated: true,
+          };
+        } else {
+          userProfile.name = formatFirstName(data.user.name);
+          userProfile.email = data.user.email;
+          userProfile.college = data.user.college || userProfile.college;
+          userProfile.track = data.user.track || userProfile.track;
+          userProfile.isAuthenticated = true;
+        }
+
+        saveUserProfile(userProfile);
+        setIsLoading(false);
+        onLoginSuccess(userProfile);
+        onNavigate('/dashboard');
+        return;
+      }
+
       setIsLoading(false);
-      const finalName = formatFirstName(signInEmail);
-      const mockUser: UserProfile = {
-        name: finalName,
-        email: signInEmail,
-        streak: 60,
-        completedDays: 60,
-        currentDay: 60,
-        isAuthenticated: true,
-      };
-      localStorage.setItem('abtalks_user', JSON.stringify(mockUser));
-      onLoginSuccess(mockUser);
-      onNavigate('/dashboard');
-    }, 1000);
+      if (data && typeof data.message === 'string' && data.message.trim() !== '') {
+        setErrors({ signInPassword: data.message });
+      } else if (res.status === 502 || res.status === 503 || res.status === 504) {
+        setErrors({ signInPassword: 'Backend unavailable. Please make sure the backend is running.' });
+      } else {
+        setErrors({ signInPassword: 'Invalid email or password' });
+      }
+    } catch {
+      setIsLoading(false);
+      setErrors({ signInPassword: 'Backend unavailable. Please make sure the backend is running.' });
+    }
   };
 
-  const handleSignUpSubmit = (e: React.FormEvent) => {
+  const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
 
@@ -107,26 +148,58 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
     setErrors({});
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: signUpName.trim(),
+          email: signUpEmail.trim(),
+          password: signUpPassword,
+          college: signUpCollege.trim(),
+          track: selectedTrack,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if ((res.status === 200 || res.status === 201) && data?.success && data?.user) {
+        setIsLoading(false);
+        setSuccessOverlay(true);
+
+        const newUser = createNewUser(
+          data.user.name,
+          data.user.email,
+          data.user.college,
+          data.user.track
+        );
+
+        saveUserProfile(newUser);
+
+        setTimeout(() => {
+          onLoginSuccess(newUser);
+          onNavigate('/dashboard');
+        }, 1500);
+        return;
+      }
+
       setIsLoading(false);
-      setSuccessOverlay(true);
-
-      const mockUser: UserProfile = {
-        name: formatFirstName(signUpName.trim()),
-        email: signUpEmail.trim(),
-        college: signUpCollege.trim(),
-        track: selectedTrack,
-        streak: 0,
-        isAuthenticated: true,
-      };
-
-      localStorage.setItem('abtalks_user', JSON.stringify(mockUser));
-
-      setTimeout(() => {
-        onLoginSuccess(mockUser);
-        onNavigate('/dashboard');
-      }, 1500);
-    }, 1200);
+      if (data && typeof data.message === 'string' && data.message.trim() !== '') {
+        const msg = data.message;
+        if (msg.toLowerCase().includes('email')) {
+          setErrors({ signUpEmail: msg });
+        } else {
+          setErrors({ signUpName: msg });
+        }
+      } else if (res.status === 502 || res.status === 503 || res.status === 504) {
+        setErrors({ signUpEmail: 'Backend unavailable. Please make sure the backend is running.' });
+      } else {
+        setErrors({ signUpName: 'Signup failed. Please try again.' });
+      }
+    } catch {
+      setIsLoading(false);
+      setErrors({ signUpEmail: 'Backend unavailable. Please make sure the backend is running.' });
+    }
   };
 
   const handleForgotPassword = () => {

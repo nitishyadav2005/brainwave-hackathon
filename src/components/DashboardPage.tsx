@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
-import { getEffectiveUserProgress, getExtensionInfo } from '../utils/userProgress';
+import { getEffectiveUserProgress } from '../utils/userProgress';
 import { CertificateModal } from './CertificateModal';
 import {
   Flame,
@@ -94,8 +94,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
     return !!user?.streakSaverProtectedYesterday;
   });
 
-  const isMissedYesterdayRaw = (() => {
+  const [simulatedMissed, setSimulatedMissed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
+      return localStorage.getItem('abtalks_missed_yesterday') === 'true';
+    }
+    return !!user?.missedYesterday;
+  });
+
+  // Calculate missed yesterday based on calendar dates OR explicit flag
+  const isMissedYesterdayRaw = (() => {
+    if (simulatedMissed) return true;
+    if (typeof window !== 'undefined') {
+      const lastSub = localStorage.getItem('abtalks_last_submission_date');
+      if (lastSub) {
+        const lastDate = new Date(lastSub);
+        const today = new Date();
+        const lastUtc = Date.UTC(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+        const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+        const diffDays = Math.floor((todayUtc - lastUtc) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 2) return true; // 2+ days since last submission = missed yesterday
+      }
       const storedMissed = localStorage.getItem('abtalks_missed_yesterday');
       if (storedMissed !== null) return storedMissed === 'true';
     }
@@ -103,6 +121,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   })();
 
   const isMissedYesterday = isMissedYesterdayRaw && !isProtectedYesterday;
+
+  // Handler to simulate skipping a day for testing
+  const handleSimulateMissedDay = () => {
+    setSimulatedMissed(true);
+    setIsProtectedYesterday(false);
+    setShowSavedSuccessToast(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('abtalks_missed_yesterday', 'true');
+      localStorage.setItem('abtalks_streak_saver_protected_yesterday', 'false');
+    }
+  };
 
   // Handler to confirm using a streak saver
   const handleConfirmUseStreakSaver = () => {
@@ -112,12 +141,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
     
     setStreakSaversUsed(newUsed);
     setIsProtectedYesterday(true);
+    setSimulatedMissed(false);
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('abtalks_streak_savers_used', String(newUsed));
       localStorage.setItem('abtalks_streak_savers_remaining', String(newRemaining));
       localStorage.setItem('abtalks_streak_saver_protected_yesterday', 'true');
       localStorage.setItem('abtalks_missed_yesterday', 'false');
+
+      // Set last submission date to yesterday to keep streak timeline intact
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      localStorage.setItem('abtalks_last_submission_date', yesterday.toISOString());
 
       try {
         const savedUser = localStorage.getItem('abtalks_user');
@@ -138,90 +173,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
     setShowSavedSuccessToast(true);
   };
 
-  // 5-Day Grace Period & Certificate State & Handlers
-  const [extensionInfo, setExtensionInfo] = useState(() => getExtensionInfo(user));
-  const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
-  const [showExtensionActivatedToast, setShowExtensionActivatedToast] = useState(false);
-  const [dismissedExtensionPrompt, setDismissedExtensionPrompt] = useState(false);
+  // Certificate State
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
-  const [isGraceCompleteModalOpen, setIsGraceCompleteModalOpen] = useState(false);
-
-  // Handler: Option 1 (Project Complete -> Get Certificate)
-  const handleMarkProjectComplete = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('abtalks_challenge_status', 'completed');
-      localStorage.setItem('abtalks_project_completed', 'true');
-
-      try {
-        const savedUser = localStorage.getItem('abtalks_user');
-        if (savedUser) {
-          const parsed = JSON.parse(savedUser);
-          parsed.challengeStatus = 'completed';
-          parsed.projectCompleted = true;
-          localStorage.setItem('abtalks_user', JSON.stringify(parsed));
-        }
-      } catch (e) {
-        console.warn('Error saving completed status to user:', e);
-      }
-    }
-
-    setExtensionInfo((prev) => ({
-      ...prev,
-      challengeStatus: 'completed',
-      projectCompleted: true,
-    }));
-
-    setIsGraceCompleteModalOpen(false);
-    setIsCertificateOpen(true);
-  };
-
-  // Handler: Option 2 (Give Me 5 More Days -> Grace Period)
-  const handleActivateGracePeriod = () => {
-    const now = new Date();
-    const endDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
-    const startDateStr = now.toISOString();
-    const endDateStr = endDate.toISOString();
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('abtalks_grace_used', 'true');
-      localStorage.setItem('abtalks_extension_used', 'true');
-      localStorage.setItem('abtalks_grace_start_date', startDateStr);
-      localStorage.setItem('abtalks_grace_end_date', endDateStr);
-      localStorage.setItem('abtalks_challenge_status', 'grace_period');
-
-      try {
-        const savedUser = localStorage.getItem('abtalks_user');
-        if (savedUser) {
-          const parsed = JSON.parse(savedUser);
-          parsed.gracePeriodUsed = true;
-          parsed.extensionUsed = true;
-          parsed.graceStartDate = startDateStr;
-          parsed.graceEndDate = endDateStr;
-          parsed.challengeStatus = 'grace_period';
-          localStorage.setItem('abtalks_user', JSON.stringify(parsed));
-        }
-      } catch (e) {
-        console.warn('Error saving grace period to user:', e);
-      }
-    }
-
-    setExtensionInfo({
-      extensionUsed: true,
-      extensionTotalDays: 5,
-      extensionDaysRemaining: 5,
-      extensionStartDate: startDateStr,
-      extensionEndDate: endDateStr,
-      projectCompleted: false,
-      challengeStatus: 'grace_period',
-      isExpired: false,
-    });
-
-    setIsExtensionModalOpen(false);
-    setShowExtensionActivatedToast(true);
-    setTimeout(() => {
-      setShowExtensionActivatedToast(false);
-    }, 4500);
-  };
 
   // Derived variables based on current user (ensuring clean first name "Nitish", no surname)
   const name = formatFirstName(user?.name);
@@ -238,10 +191,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
   const totalDays = 60;
   const progressDay = isFirstDay ? 0 : currentDay;
   const completionPercentage = isFirstDay ? 0 : progress.completionPercentage;
-
-  // Eligible for 5-Day Extension if at/past Day 60, completed < 60 days, and extension not yet used
-  const isEligibleForExtension =
-    currentDay >= 60 && completedDays < 60 && !extensionInfo.extensionUsed;
 
   const scrollToJourney = () => {
     if (journeyRef.current) {
@@ -292,9 +241,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           <div
             onClick={() => onNavigate('/profile')}
             title={`${name} (${college}) — ${track}`}
-            className="w-9 h-9 rounded-full bg-[#4c5b71] text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:opacity-90 transition-opacity border-2 border-white select-none"
+            className="w-9 h-9 rounded-full bg-[#4c5b71] text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:opacity-90 transition-opacity border-2 border-white select-none overflow-hidden"
           >
-            {name.charAt(0).toUpperCase()}
+            {user?.avatar ? (
+              <img src={user.avatar} alt={name} className="w-full h-full object-cover rounded-full" />
+            ) : (
+              name.charAt(0).toUpperCase()
+            )}
           </div>
         </div>
       </header>
@@ -474,90 +427,31 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                       </>
                     )}
                   </p>
+
+                  {/* Test Missed Day Simulator Trigger */}
+                  <div className="flex items-center justify-between flex-wrap gap-2 mt-2.5 pt-2 border-t border-slate-100">
+                    <span className="text-[11px] text-slate-400 font-medium">
+                      Streak Savers: <span className="font-bold text-[#4c5b71]">{streakSaversRemaining} of 3</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleSimulateMissedDay}
+                      className="text-[10px] font-bold text-[#4c5b71] hover:text-[#38485d] bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                      title="Simulate skipping yesterday to test Streak Saver"
+                    >
+                      <RefreshCw className="w-3 h-3 text-[#4c5b71]" />
+                      <span>Test Missed Day</span>
+                    </button>
+                  </div>
                 </div>
               </section>
             )}
 
-            {/* 6. RECENT BADGES (Shown in sidebar on desktop) */}
-            <section className="hidden lg:block bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 space-y-3">
-              <h3 className="text-base font-bold text-[#191c1e]">
-                Recent Badges
-              </h3>
 
-              <div className="flex flex-wrap gap-2">
-                <div className="bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
-                  <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
-                    First Commit
-                  </span>
-                </div>
-
-                <div className="bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs">
-                  <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                  <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
-                    7 Day Streak
-                  </span>
-                </div>
-
-                <div className="bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs">
-                  <Zap className="w-3.5 h-3.5 text-[#4c5b71] fill-[#4c5b71]" />
-                  <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
-                    10 Builds
-                  </span>
-                </div>
-
-                <div className="bg-slate-100/80 border border-slate-200/60 px-3 py-1.5 rounded-full flex items-center gap-1.5 opacity-60">
-                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="font-mono-code text-xs font-semibold text-slate-500">
-                    30 Day Streak
-                  </span>
-                </div>
-              </div>
-            </section>
           </div>
 
           {/* MAIN CONTENT COLUMN (Today's Mission & Journey Grid) */}
           <div className="lg:col-span-8 space-y-5 lg:order-1">
-            {/* 5-DAY FINISH EXTENSION PROMPT (When reached Day 60 with incomplete days) */}
-            {isEligibleForExtension && !dismissedExtensionPrompt && (
-              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border-2 border-amber-300/80 space-y-4 relative overflow-hidden animate-in fade-in">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-mono-code text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-md tracking-wider">
-                    ALMOST THERE
-                  </span>
-                  <span className="font-mono-code text-xs text-slate-600 font-bold">
-                    {completedDays} / 60 DAYS COMPLETE
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-3.5 pt-1">
-                  <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-xl shadow-2xs">
-                    ⏳
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-xl font-extrabold text-[#191c1e] leading-tight">
-                      {completedDays} / 60 DAYS COMPLETE
-                    </h3>
-                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                      You've built most of the way. Take 5 extra days to finish what you started.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-2 space-y-2">
-                  <button
-                    onClick={() => setIsExtensionModalOpen(true)}
-                    className="w-full py-3 px-4 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
-                  >
-                    <span>Use 5-Day Extension →</span>
-                  </button>
-                  <p className="text-[11px] text-center text-slate-500 font-medium italic">
-                    Your completed work is safe.
-                  </p>
-                </div>
-              </section>
-            )}
-
             {/* 4. TODAY'S MISSION (PRIMARY ACTION) */}
             <section className="bg-white rounded-2xl p-5 shadow-sm border-2 border-[#4c5b71]/20 space-y-4 relative">
           {/* Header Row */}
@@ -618,132 +512,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
 
         {/* 5. JOURNEY */}
         <section ref={journeyRef} className="space-y-3 pt-2">
-          {/* DAY 60 DECISION CARD */}
-          {completedDays >= 60 &&
-            (!extensionInfo.challengeStatus ||
-              extensionInfo.challengeStatus === 'day60_decision') &&
-            !extensionInfo.projectCompleted && (
-              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border-2 border-[#4c5b71]/20 space-y-4 animate-in fade-in">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-mono-code text-[10px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-md tracking-wider flex items-center gap-1">
-                    <span>🎉</span> 60 DAYS COMPLETE
-                  </span>
-                  <span className="font-mono-code text-xs text-slate-600 font-bold">
-                    60 / 60 DAYS
-                  </span>
-                </div>
-
-                <div className="space-y-1.5 text-left">
-                  <h3 className="text-xl font-extrabold text-[#191c1e] leading-snug">
-                    Did you complete your project?
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    You've reached the end of the 60-day challenge. Tell us how you want to finish your journey.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  {/* OPTION 1: PROJECT COMPLETE */}
-                  <div className="bg-emerald-50/80 border-2 border-emerald-300 rounded-2xl p-4 flex flex-col justify-between space-y-3.5 hover:border-emerald-400 transition-all shadow-2xs">
-                    <div className="space-y-1 text-left">
-                      <div className="flex items-center gap-1.5 text-emerald-800 font-extrabold text-xs">
-                        <span className="w-5 h-5 rounded-full bg-emerald-200 text-emerald-900 flex items-center justify-center text-[11px] font-bold">✓</span>
-                        <span>PROJECT COMPLETE</span>
-                      </div>
-                      <p className="text-xs text-emerald-950 font-bold pt-1">
-                        "I completed my project."
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleMarkProjectComplete}
-                      className="w-full py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 min-h-[40px]"
-                    >
-                      <span>Get My Completion Certificate →</span>
-                    </button>
-                  </div>
-
-                  {/* OPTION 2: NEED MORE TIME */}
-                  {!extensionInfo.extensionUsed && (
-                    <div className="bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-4 flex flex-col justify-between space-y-3.5 hover:border-amber-400 transition-all shadow-2xs">
-                      <div className="space-y-1 text-left">
-                        <div className="flex items-center gap-1.5 text-amber-900 font-extrabold text-xs">
-                          <span className="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-[11px] font-bold">⏳</span>
-                          <span>NEED MORE TIME</span>
-                        </div>
-                        <p className="text-xs text-amber-950 font-bold pt-1">
-                          "I need a little more time to finish."
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleActivateGracePeriod}
-                        className="w-full py-2.5 px-3 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98] flex items-center justify-center gap-1 min-h-[40px]"
-                      >
-                        <span>Give Me 5 More Days →</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
-          {/* ACTIVE 5-DAY GRACE PERIOD CARD */}
-          {(extensionInfo.challengeStatus === 'grace_period' ||
-            extensionInfo.challengeStatus === 'extension') &&
-            !extensionInfo.isExpired &&
-            !extensionInfo.projectCompleted && (
-              <div className="bg-amber-50/95 border-2 border-amber-300/80 rounded-2xl p-5 shadow-xs space-y-3.5 animate-in fade-in">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 shrink-0 font-extrabold text-sm">
-                      ⏳
-                    </div>
-                    <span className="font-mono-code text-[10px] font-extrabold text-amber-900 uppercase tracking-wider bg-amber-100/90 px-2.5 py-0.5 rounded-md border border-amber-200">
-                      FINAL 5 DAYS
-                    </span>
-                  </div>
-                  <span className="font-mono-code text-xs font-extrabold text-amber-950 bg-amber-200/90 px-3 py-1 rounded-xl border border-amber-300 shadow-2xs">
-                    {extensionInfo.extensionDaysRemaining} DAY{extensionInfo.extensionDaysRemaining !== 1 ? 'S' : ''} LEFT
-                  </span>
-                </div>
-
-                <div className="space-y-1 text-left">
-                  <p className="text-xs text-amber-950 font-medium leading-relaxed">
-                    Your 60-day challenge is complete. You have 5 extra days to finish your project.
-                  </p>
-                </div>
-
-                {/* Progress line */}
-                <div className="space-y-1.5 pt-0.5">
-                  <div className="flex items-center justify-between font-mono-code text-[10px] font-extrabold text-amber-900">
-                    <span>GRACE PERIOD TIME USED</span>
-                    <span>{5 - extensionInfo.extensionDaysRemaining + 1} / 5 DAYS</span>
-                  </div>
-                  <div className="w-full bg-amber-200/80 rounded-full h-2 overflow-hidden border border-amber-300/50">
-                    <div
-                      className="bg-amber-600 h-full rounded-full transition-all duration-300"
-                      style={{ width: `${((5 - extensionInfo.extensionDaysRemaining + 1) / 5) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1 border-t border-amber-200/80 font-mono-code text-xs font-extrabold text-amber-950">
-                  <span>60 / 60 DAYS</span>
-                  <span className="text-[10px] font-bold text-amber-800/90 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
-                    1-TIME GRACE PERIOD
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => setIsGraceCompleteModalOpen(true)}
-                  className="w-full py-3 px-4 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] active:scale-[0.99]"
-                >
-                  <span>Mark Project Complete →</span>
-                </button>
-              </div>
-            )}
-
           {/* CHALLENGE COMPLETED CARD */}
-          {(extensionInfo.challengeStatus === 'completed' || extensionInfo.projectCompleted) && (
+          {completedDays >= 60 && (
             <div className="bg-emerald-50 border-2 border-emerald-300/90 rounded-2xl p-5 sm:p-6 shadow-xs space-y-3.5 text-center animate-in fade-in">
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center mx-auto text-emerald-700 font-extrabold text-xl shadow-2xs">
                 🎉
@@ -767,36 +537,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               >
                 <span>View Completion Certificate →</span>
               </button>
-            </div>
-          )}
-
-          {/* GRACE EXPIRED CARD */}
-          {(extensionInfo.challengeStatus === 'grace_expired' ||
-            (extensionInfo.isExpired && !extensionInfo.projectCompleted)) && (
-            <div className="bg-slate-100 border border-slate-300 rounded-2xl p-5 shadow-xs space-y-3 text-center animate-in fade-in">
-              <div className="space-y-1">
-                <span className="font-mono-code text-[10px] font-extrabold text-slate-700 uppercase bg-slate-200 px-2.5 py-0.5 rounded-md border border-slate-300 inline-block">
-                  CHALLENGE WINDOW CLOSED
-                </span>
-                <h3 className="text-xl font-extrabold text-slate-900 pt-0.5">
-                  60 / 60 DAYS SAVED
-                </h3>
-                <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md mx-auto">
-                  Your 5-day grace period has ended. Your 60-day progress is saved.
-                </p>
-              </div>
-
-              <div className="pt-1 flex flex-col sm:flex-row items-center justify-center gap-2.5">
-                <button
-                  onClick={() => onNavigate('/progress')}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-[0.98]"
-                >
-                  View My Progress →
-                </button>
-                <span className="font-mono-code text-[10px] font-semibold text-slate-500 bg-slate-200/80 px-2.5 py-1 rounded-md">
-                  5-DAY GRACE PERIOD USED
-                </span>
-              </div>
             </div>
           )}
 
@@ -824,8 +564,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           </div>
 
           {/* 60-Day Grid */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs">
-            <div className="grid grid-cols-6 gap-2">
+          <div className="bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-xs w-full max-w-full">
+            <div className="grid grid-cols-10 gap-1 sm:gap-2">
               {Array.from({ length: totalDays }, (_, i) => {
                 const dayNum = i + 1;
                 const isCompleted = !isFirstDay && dayNum <= completedDays;
@@ -833,6 +573,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                 const isMilestone = dayNum % 10 === 0;
                 const reportId = isMilestone ? dayNum / 10 : 0;
                 const reportDef = isMilestone ? REPORT_LIST.find((r) => r.id === reportId) : undefined;
+                const isNextMilestone = isMilestone && !isCompleted && (currentDay <= dayNum && currentDay > dayNum - 10);
+                const daysAway = Math.max(1, dayNum - completedDays);
 
                 return (
                   <button
@@ -852,8 +594,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                     title={
                       isMilestone
                         ? isCompleted
-                          ? `Day ${dayNum}: Report Milestone Available`
-                          : `Day ${dayNum}: Report Milestone Locked`
+                          ? `Day ${dayNum}: Certificate Milestone Unlocked`
+                          : isNextMilestone
+                          ? `Day ${dayNum}: Next Certificate Milestone (${daysAway} day${daysAway !== 1 ? 's' : ''} away)`
+                          : `Day ${dayNum}: Certificate Unlocks at Day ${dayNum}`
                         : isCompleted
                         ? `Day ${dayNum}: Completed`
                         : isCurrent
@@ -861,47 +605,43 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                         : `Day ${dayNum}: Upcoming`
                     }
                     className={`
-                      aspect-square rounded-lg font-mono-code text-xs font-bold flex flex-col items-center justify-center transition-all relative overflow-hidden
+                      h-12 sm:h-14 rounded-xl font-mono-code text-xs font-bold flex flex-col items-center justify-center transition-all relative overflow-hidden p-0.5 sm:p-1 min-w-0 w-full
                       ${
                         isMilestone
                           ? isCompleted
-                            ? 'bg-gradient-to-b from-amber-500 via-amber-600 to-amber-700 text-white border-2 border-amber-300 shadow-md cursor-pointer hover:scale-105 active:scale-95 ring-2 ring-amber-400/80 z-10'
-                            : 'bg-gradient-to-b from-amber-50/90 to-amber-100/70 text-amber-900 border-2 border-dashed border-amber-500/80 shadow-2xs cursor-pointer hover:scale-105 active:scale-95 hover:border-amber-600 hover:shadow-xs'
+                            ? 'bg-gradient-to-b from-amber-500 via-amber-600 to-amber-700 text-white border-2 border-amber-300 shadow-xs cursor-pointer hover:scale-[1.03] active:scale-95 z-10'
+                            : isNextMilestone
+                            ? 'bg-amber-50/95 text-amber-950 border-2 border-amber-400 shadow-2xs cursor-pointer hover:scale-[1.03] active:scale-95 z-10'
+                            : 'bg-slate-50/80 text-slate-600 border border-slate-200/90 shadow-2xs cursor-pointer hover:scale-[1.02] hover:border-slate-300 hover:bg-slate-100/80 active:scale-95'
                           : isCompleted
-                          ? 'bg-[#d3e4fe] text-[#0b1c30] border border-[#b1d0fd] hover:bg-[#c2d9fc] cursor-pointer hover:scale-105 active:scale-95 shadow-2xs'
+                          ? 'bg-emerald-50/80 text-emerald-700 border border-emerald-200/90 hover:bg-emerald-100/80 cursor-pointer hover:scale-[1.02] active:scale-95 shadow-2xs'
                           : isCurrent
-                          ? 'bg-[#4c5b71] text-white shadow-sm ring-2 ring-[#4c5b71] ring-offset-2 ring-offset-white cursor-pointer scale-105 z-10'
-                          : 'bg-[#f1f3f5] text-slate-400 border border-slate-200/50 cursor-not-allowed hover:bg-slate-200/60 transition-colors'
+                          ? 'bg-[#1e293b] text-white shadow-sm border border-[#1e293b] cursor-pointer scale-[1.03] z-10'
+                          : 'bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50 cursor-pointer'
                       }
                     `}
                   >
                     {isMilestone ? (
                       isCompleted ? (
-                        dayNum === 60 ? (
-                          <div className="flex flex-col items-center justify-center gap-0.5">
-                            <Trophy className="w-4 h-4 text-amber-100 stroke-[2.2] filter drop-shadow-xs" />
-                            <span className="text-[10px] font-black leading-none text-white">60</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center gap-0.5">
-                            <Award className="w-4 h-4 text-amber-100 stroke-[2.2] filter drop-shadow-xs" />
-                            <span className="text-[10px] font-black leading-none text-white">{dayNum}</span>
-                          </div>
-                        )
-                      ) : (
                         <div className="flex flex-col items-center justify-center gap-0.5">
-                          {dayNum === 60 ? (
-                            <Trophy className="w-3.5 h-3.5 text-amber-600 stroke-[2.2]" />
-                          ) : (
-                            <Lock className="w-3.5 h-3.5 text-amber-600 stroke-[2.5]" />
-                          )}
-                          <span className="text-[10px] font-black text-amber-900 leading-none">{dayNum}</span>
+                          <Trophy className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-amber-100 stroke-[2.2]" />
+                          <span className="text-[9px] sm:text-[10px] font-black leading-none text-white">{dayNum}</span>
+                        </div>
+                      ) : isNextMilestone ? (
+                        <div className="flex flex-col items-center justify-center gap-0.5">
+                          <Award className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-amber-600 stroke-[2.2]" />
+                          <span className="text-[9px] sm:text-[11px] font-black text-amber-950 leading-none">{dayNum}</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center gap-0.5 text-slate-500">
+                          <Lock className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-slate-400 stroke-[2]" />
+                          <span className="text-[9px] sm:text-[11px] font-black text-slate-700 leading-none">{dayNum}</span>
                         </div>
                       )
                     ) : isCompleted ? (
-                      <Check className="w-3.5 h-3.5 stroke-[2.8]" />
+                      <Check className="w-3.5 sm:w-4 h-3.5 sm:h-4 stroke-[3] text-emerald-600" />
                     ) : (
-                      <span className={isCurrent ? 'font-extrabold text-white text-xs' : 'font-semibold text-slate-400 text-[11px]'}>{dayNum}</span>
+                      <span className={isCurrent ? 'font-black text-white text-xs sm:text-sm' : 'font-semibold text-slate-700 text-xs sm:text-sm'}>{dayNum}</span>
                     )}
                   </button>
                 );
@@ -909,59 +649,55 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             </div>
 
             {/* Grid Legend */}
-            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono-code text-slate-500 flex-wrap gap-2">
+            <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-mono-code text-slate-600 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-[#d3e4fe] inline-block" />
-                <span>Completed ({completedDays})</span>
+                <span className="w-3 h-3 rounded-xs bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                  <Check className="w-2.5 h-2.5 text-emerald-600 stroke-[3]" />
+                </span>
+                <span>Completed</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-xs bg-[#4c5b71] inline-block" />
-                <span>Active (Day {currentDay})</span>
+                <span className="w-3 h-3 rounded-xs bg-[#1e293b] inline-block" />
+                <span>Current Day</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-amber-600 stroke-[2.2]" />
-                <span className="font-bold text-amber-900">Report</span>
+                <span className="w-3 h-3 rounded-xs bg-white border border-slate-200 inline-block" />
+                <span>Pending</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5 text-amber-600" />
+                <span className="font-semibold text-amber-900">Upcoming Milestone</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-slate-400" />
+                <span>Locked Milestone</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                <span className="font-semibold text-amber-900">Unlocked Milestone</span>
               </div>
             </div>
+
+            {/* Helper Tip */}
+            {completedDays < 60 && (() => {
+              const nextCertDay = [10, 20, 30, 40, 50, 60].find((m) => m > completedDays) || 60;
+              const daysToCert = Math.max(1, nextCertDay - completedDays);
+              return (
+                <div className="mt-3.5 p-3 sm:p-3.5 bg-slate-50/80 border border-slate-200/70 rounded-xl text-xs text-slate-600 font-medium flex items-start gap-2.5 sm:gap-3 w-full min-w-0 box-border h-auto">
+                  <span className="text-sm shrink-0 leading-normal select-none">💡</span>
+                  <p
+                    className="flex-1 min-w-0 leading-relaxed text-slate-600 font-medium text-xs break-words m-0"
+                    style={{ overflowWrap: 'anywhere', wordBreak: 'normal', whiteSpace: 'normal' }}
+                  >
+                    Keep going! You're {daysToCert} day{daysToCert !== 1 ? 's' : ''} away from your next certificate.
+                  </p>
+                </div>
+              );
+            })()}
           </div>
         </section>
 
-            {/* 6. RECENT BADGES (Mobile view) */}
-            <section className="lg:hidden space-y-2.5 pt-1">
-              <h3 className="text-base font-bold text-[#191c1e]">
-                Recent Badges
-              </h3>
 
-              <div className="flex flex-wrap gap-2">
-                <div className="bg-white border border-slate-200/80 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
-                  <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
-                    First Commit
-                  </span>
-                </div>
-
-                <div className="bg-white border border-slate-200/80 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs">
-                  <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                  <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
-                    7 Day Streak
-                  </span>
-                </div>
-
-                <div className="bg-white border border-slate-200/80 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs">
-                  <Zap className="w-3.5 h-3.5 text-[#4c5b71] fill-[#4c5b71]" />
-                  <span className="font-mono-code text-xs font-semibold text-[#191c1e]">
-                    10 Builds
-                  </span>
-                </div>
-
-                <div className="bg-slate-100/80 border border-slate-200/60 px-3 py-1.5 rounded-full flex items-center gap-1.5 opacity-60">
-                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="font-mono-code text-xs font-semibold text-slate-500">
-                    30 Day Streak
-                  </span>
-                </div>
-              </div>
-            </section>
           </div>
         </div>
 
@@ -1052,12 +788,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
               <>
                 <div className="flex items-start justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
-                      <Lock className="w-4 h-4" />
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
+                      {selectedReportModal.reportId === 6 ? (
+                        <Trophy className="w-5 h-5 text-amber-600" />
+                      ) : (
+                        <Award className="w-5 h-5 text-amber-600" />
+                      )}
                     </div>
                     <div>
+                      <span className="font-mono-code text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full inline-block mb-0.5 border border-amber-200/80">
+                        LOCKED CERTIFICATE MILESTONE
+                      </span>
                       <h3 className="text-base font-extrabold text-[#191c1e]">
-                        Progress Report 0{selectedReportModal.reportId}
+                        Day {selectedReportModal.reportDef.requiredCompletedDays} Certificate
                       </h3>
                       <p className="font-mono-code text-xs font-bold text-slate-500">
                         {selectedReportModal.reportDef.periodLabel}
@@ -1072,13 +815,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                   </button>
                 </div>
 
-                <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-center space-y-1">
-                  <p className="text-xs font-bold text-[#191c1e]">
-                    “Complete Day {selectedReportModal.reportDef.requiredCompletedDays} to unlock your report.”
+                <div className="bg-amber-50/70 rounded-xl p-4 border border-amber-200/80 text-center space-y-2">
+                  <p className="text-xs font-extrabold text-amber-950">
+                    “Complete Day {selectedReportModal.reportDef.requiredCompletedDays} to unlock your certificate.”
                   </p>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Turn every 10 completed challenge days into a verified progress document.
-                  </p>
+                  <div className="inline-flex items-center gap-1.5 bg-white px-3 py-1 rounded-full border border-amber-200 text-amber-900 font-mono-code text-[11px] font-bold shadow-2xs">
+                    <Lock className="w-3 h-3 text-amber-600" />
+                    <span>
+                      {selectedReportModal.reportDef.requiredCompletedDays - completedDays} day{selectedReportModal.reportDef.requiredCompletedDays - completedDays !== 1 ? 's' : ''} away ({completedDays}/{selectedReportModal.reportDef.requiredCompletedDays} Completed)
+                    </span>
+                  </div>
                 </div>
 
                 <div className="pt-1">
@@ -1158,122 +904,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
         </div>
       )}
 
-      {/* 5-DAY FINISH EXTENSION CONFIRMATION MODAL / BOTTOM SHEET */}
-      {isExtensionModalOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          onClick={() => setIsExtensionModalOpen(false)}
-        >
-          <div
-            className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 border border-slate-200 shadow-2xl space-y-5 animate-in slide-in-from-bottom duration-200 mb-14 sm:mb-0 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700 text-xl font-extrabold shadow-xs">
-              ⏳
-            </div>
-
-            <div className="space-y-1.5">
-              <h3 className="text-xl font-extrabold text-[#191c1e]">Finish Strong</h3>
-              <p className="text-xs text-slate-600 font-medium leading-relaxed px-2">
-                You have 5 extra days to complete the remaining challenge days.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-around font-mono-code text-[11px] font-bold text-slate-700 divide-x divide-slate-200">
-              <div className="px-2">
-                <div className="text-slate-900 text-xs font-extrabold">{completedDays} / 60</div>
-                <div className="text-[10px] text-slate-500 font-medium">Completed</div>
-              </div>
-              <div className="px-2">
-                <div className="text-amber-700 text-xs font-extrabold">5 Extra</div>
-                <div className="text-[10px] text-slate-500 font-medium">Days</div>
-              </div>
-              <div className="px-2">
-                <div className="text-slate-900 text-xs font-extrabold">One-time</div>
-                <div className="text-[10px] text-slate-500 font-medium">Extension</div>
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <button
-                onClick={handleActivateGracePeriod}
-                className="w-full bg-[#4c5b71] hover:bg-[#38485d] text-white font-bold text-xs py-3 rounded-xl shadow-xs transition-all cursor-pointer active:scale-[0.99] min-h-[44px]"
-              >
-                Start My Extension →
-              </button>
-              <button
-                onClick={() => setIsExtensionModalOpen(false)}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition-colors cursor-pointer min-h-[40px]"
-              >
-                Maybe Later
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* CONFIRMATION MODAL BEFORE MARKING PROJECT COMPLETE DURING GRACE PERIOD */}
-      {isGraceCompleteModalOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          onClick={() => setIsGraceCompleteModalOpen(false)}
-        >
-          <div
-            className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 border border-slate-200 shadow-2xl space-y-5 animate-in slide-in-from-bottom duration-200 mb-14 sm:mb-0 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-700 text-xl font-extrabold shadow-xs">
-              ✓
-            </div>
-
-            <div className="space-y-1.5">
-              <h3 className="text-xl font-extrabold text-[#191c1e]">Ready to finish?</h3>
-              <p className="text-xs text-slate-600 font-medium leading-relaxed px-2">
-                You're about to complete your ABTalks journey and receive your official Completion Certificate.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <button
-                onClick={handleMarkProjectComplete}
-                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-3 rounded-xl shadow-xs transition-all cursor-pointer active:scale-[0.99] min-h-[44px]"
-              >
-                Complete Challenge & Get Certificate →
-              </button>
-              <button
-                onClick={() => setIsGraceCompleteModalOpen(false)}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition-colors cursor-pointer min-h-[40px]"
-              >
-                Not Yet
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* OFFICIAL COMPLETION CERTIFICATE MODAL */}
       <CertificateModal
         isOpen={isCertificateOpen}
         onClose={() => setIsCertificateOpen(false)}
         user={user}
       />
-
-      {/* EXTENSION ACTIVATED SUCCESS TOAST */}
-      {showExtensionActivatedToast && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-800 flex items-center gap-3 animate-in fade-in slide-in-from-top duration-300 max-w-sm w-[calc(100%-2rem)]">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-extrabold text-sm shrink-0">
-            ✓
-          </div>
-          <div className="space-y-0.5 text-left">
-            <div className="text-xs font-bold text-white uppercase tracking-wider font-mono-code">
-              EXTENSION ACTIVATED
-            </div>
-            <div className="text-[11px] text-slate-300 font-medium">
-              Your final 5 days start now.
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 7. FIXED BOTTOM NAVIGATION (Hidden on Desktop) */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex justify-around items-center max-w-md mx-auto shadow-lg">

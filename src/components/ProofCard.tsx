@@ -105,10 +105,19 @@ export const ProofCard: React.FC<ProofCardProps> = ({
         </div>
 
         {/* User Identity Details */}
-        <div className="bg-slate-50/90 rounded-xl p-3 border border-slate-100 space-y-0.5">
-          <p className="text-sm font-extrabold text-[#191c1e]">{userName}</p>
-          <p className="text-xs text-slate-600 font-medium">{userTrack}</p>
-          <p className="text-[11px] text-slate-500 font-medium">{userCollege}</p>
+        <div className="bg-slate-50/90 rounded-xl p-3 border border-slate-100 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#4c5b71] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs border border-white overflow-hidden select-none">
+            {user?.avatar ? (
+              <img src={user.avatar} alt={userName} className="w-full h-full object-cover rounded-full" />
+            ) : (
+              userName.charAt(0).toUpperCase()
+            )}
+          </div>
+          <div className="space-y-0.5 min-w-0 flex-1">
+            <p className="text-sm font-extrabold text-[#191c1e] truncate">{userName}</p>
+            <p className="text-xs text-slate-600 font-medium truncate">{userTrack}</p>
+            <p className="text-[11px] text-slate-500 font-medium truncate">{userCollege}</p>
+          </div>
         </div>
 
         {/* Challenge Completion Progress */}

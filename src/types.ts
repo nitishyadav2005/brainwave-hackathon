@@ -17,6 +17,7 @@ export interface GridDayState {
 export interface UserProfile {
   name: string;
   email: string;
+  avatar?: string;
   college?: string;
   track?: string;
   streak: number;
@@ -29,18 +30,8 @@ export interface UserProfile {
   streakSaversUsed?: number;
   streakSaversRemaining?: number;
   streakSaverProtectedYesterday?: boolean;
-  extensionUsed?: boolean;
-  extensionTotalDays?: number;
-  extensionDaysRemaining?: number;
-  extensionStartDate?: string | null;
-  extensionEndDate?: string | null;
   projectCompleted?: boolean;
-  gracePeriodUsed?: boolean;
-  graceDaysTotal?: number;
-  graceDaysRemaining?: number;
-  graceStartDate?: string | null;
-  graceEndDate?: string | null;
-  challengeStatus?: 'active' | 'day60_decision' | 'grace_period' | 'completed' | 'grace_expired' | 'extension' | 'extension_expired';
+  challengeStatus?: 'active' | 'completed';
   isAuthenticated: boolean;
 }
 

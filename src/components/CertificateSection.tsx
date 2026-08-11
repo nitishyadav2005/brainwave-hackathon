@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, CheckCircle2, ArrowRight, ShieldCheck, Sparkles, Clock } from 'lucide-react';
+import { Award, CheckCircle2, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface CertificateSectionProps {
   onStartChallenge: () => void;
