@@ -17,6 +17,7 @@ export interface GridDayState {
 export interface UserProfile {
   name: string;
   email: string;
+  password?: string;
   avatar?: string;
   college?: string;
   track?: string;

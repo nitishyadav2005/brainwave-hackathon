@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, Sparkles, Lock, Mail, User, GraduationCap, Code2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Sparkles, Lock, Mail, User, GraduationCap, Code2, AlertCircle, X, KeyRound, Send, CheckCircle2 } from 'lucide-react';
 import { AuthMode, UserProfile } from '../types';
 import { formatFirstName } from '../utils/nameUtils';
 import { createNewUser, loadUserProfile, saveUserProfile } from '../utils/userProgress';
@@ -30,6 +30,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
 
   // Validation errors
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Forgot Password Modal state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotStep, setForgotStep] = useState<'email' | 'sent' | 'reset'>('email');
+  const [forgotError, setForgotError] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const validateEmail = (email: string) => {
     return /^\S+@\S+\.\S+$/.test(email);
@@ -77,6 +86,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
           userProfile = {
             name: formatFirstName(data.user.name),
             email: data.user.email,
+            password: signInPassword,
             college: data.user.college || 'ABES Engineering College',
             track: data.user.track || 'Full Stack Development',
             currentDay: 1,
@@ -88,6 +98,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
         } else {
           userProfile.name = formatFirstName(data.user.name);
           userProfile.email = data.user.email;
+          userProfile.password = signInPassword;
           userProfile.college = data.user.college || userProfile.college;
           userProfile.track = data.user.track || userProfile.track;
           userProfile.isAuthenticated = true;
@@ -107,21 +118,29 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
         return;
       }
 
-      // Fallback for static deployments (e.g. Vercel) or when backend /api is 404 / unavailable
+      // Fallback for static deployments (e.g. Vercel) or local client state
       const emailClean = signInEmail.trim().toLowerCase();
       let userProfile = loadUserProfile(emailClean);
 
       if (!userProfile) {
-        userProfile = createNewUser(
-          emailClean.split('@')[0] || 'Student',
-          emailClean,
-          'ABES Engineering College',
-          'Full Stack Development'
-        );
-      } else {
-        userProfile.isAuthenticated = true;
+        setIsLoading(false);
+        setErrors({ signInEmail: 'No account found with this email. Please sign up first.' });
+        return;
       }
 
+      // Verify password
+      if (userProfile.password && userProfile.password !== signInPassword) {
+        setIsLoading(false);
+        setErrors({ signInPassword: 'Incorrect password. Please try again.' });
+        return;
+      }
+
+      // If legacy profile without password, set password on first login
+      if (!userProfile.password) {
+        userProfile.password = signInPassword;
+      }
+
+      userProfile.isAuthenticated = true;
       saveUserProfile(userProfile);
       setIsLoading(false);
       onLoginSuccess(userProfile);
@@ -131,16 +150,22 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
       let userProfile = loadUserProfile(emailClean);
 
       if (!userProfile) {
-        userProfile = createNewUser(
-          emailClean.split('@')[0] || 'Student',
-          emailClean,
-          'ABES Engineering College',
-          'Full Stack Development'
-        );
-      } else {
-        userProfile.isAuthenticated = true;
+        setIsLoading(false);
+        setErrors({ signInEmail: 'No account found with this email. Please sign up first.' });
+        return;
       }
 
+      if (userProfile.password && userProfile.password !== signInPassword) {
+        setIsLoading(false);
+        setErrors({ signInPassword: 'Incorrect password. Please try again.' });
+        return;
+      }
+
+      if (!userProfile.password) {
+        userProfile.password = signInPassword;
+      }
+
+      userProfile.isAuthenticated = true;
       saveUserProfile(userProfile);
       setIsLoading(false);
       onLoginSuccess(userProfile);
@@ -205,7 +230,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
           data.user.name,
           data.user.email,
           data.user.college,
-          data.user.track
+          data.user.track,
+          signUpPassword
         );
 
         saveUserProfile(newUser);
@@ -229,7 +255,16 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
         return;
       }
 
-      // Fallback for static deployments (e.g. Vercel) or when backend /api is 404 / unavailable
+      // Fallback for static deployments (e.g. Vercel) or local client state
+      const emailClean = signUpEmail.trim().toLowerCase();
+      const existingUser = loadUserProfile(emailClean);
+
+      if (existingUser) {
+        setIsLoading(false);
+        setErrors({ signUpEmail: 'An account with this email already exists. Please sign in instead.' });
+        return;
+      }
+
       setIsLoading(false);
       setSuccessOverlay(true);
 
@@ -237,7 +272,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
         signUpName.trim(),
         signUpEmail.trim(),
         signUpCollege.trim(),
-        selectedTrack
+        selectedTrack,
+        signUpPassword
       );
 
       saveUserProfile(newUser);
@@ -247,6 +283,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
         onNavigate('/dashboard');
       }, 1500);
     } catch {
+      const emailClean = signUpEmail.trim().toLowerCase();
+      const existingUser = loadUserProfile(emailClean);
+
+      if (existingUser) {
+        setIsLoading(false);
+        setErrors({ signUpEmail: 'An account with this email already exists. Please sign in instead.' });
+        return;
+      }
+
       setIsLoading(false);
       setSuccessOverlay(true);
 
@@ -254,7 +299,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
         signUpName.trim(),
         signUpEmail.trim(),
         signUpCollege.trim(),
-        selectedTrack
+        selectedTrack,
+        signUpPassword
       );
 
       saveUserProfile(newUser);
@@ -266,9 +312,74 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
     }
   };
 
-  const handleForgotPassword = () => {
-    setForgotMsg('Password reset link sent to your email (Mock).');
-    setTimeout(() => setForgotMsg(''), 4000);
+  const handleOpenForgotModal = () => {
+    setForgotEmail(signInEmail.trim() || '');
+    setForgotStep('email');
+    setForgotError('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setResetSuccess(false);
+    setShowForgotModal(true);
+  };
+
+  const handleSendResetLink = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError('');
+
+    const cleanEmail = forgotEmail.trim().toLowerCase();
+    if (!cleanEmail || !validateEmail(cleanEmail)) {
+      setForgotError('Please enter a valid email address.');
+      return;
+    }
+
+    const userProfile = loadUserProfile(cleanEmail);
+    if (!userProfile) {
+      setForgotError('No account found with this email address.');
+      return;
+    }
+
+    setForgotStep('sent');
+  };
+
+  const handleOpenResetForm = () => {
+    setForgotStep('reset');
+    setForgotError('');
+  };
+
+  const handleResetPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError('');
+
+    if (!newPassword || newPassword.length < 4) {
+      setForgotError('Password must be at least 4 characters long.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setForgotError('Passwords do not match.');
+      return;
+    }
+
+    const cleanEmail = forgotEmail.trim().toLowerCase();
+    let userProfile = loadUserProfile(cleanEmail);
+
+    if (!userProfile) {
+      setForgotError('Account not found.');
+      return;
+    }
+
+    userProfile.password = newPassword;
+    saveUserProfile(userProfile);
+
+    setResetSuccess(true);
+    setSignInEmail(cleanEmail);
+    setSignInPassword(newPassword);
+
+    setTimeout(() => {
+      setShowForgotModal(false);
+      setForgotMsg('Password updated successfully! You can now sign in.');
+      setTimeout(() => setForgotMsg(''), 5000);
+    }, 1800);
   };
 
   return (
@@ -445,7 +556,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
                   </label>
                   <button
                     type="button"
-                    onClick={handleForgotPassword}
+                    onClick={handleOpenForgotModal}
                     className="text-[11px] text-[#4c5b71] hover:underline font-semibold cursor-pointer"
                   >
                     Forgot password?
@@ -725,6 +836,197 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
       <footer className="w-full text-center py-4 text-[11px] font-mono-code text-slate-400">
         ABTalks 60-Day Challenge • Proof of Work
       </footer>
+
+      {/* FORGOT PASSWORD MODAL */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-4 animate-in zoom-in-95 duration-200">
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* STEP 1: Enter Email */}
+            {forgotStep === 'email' && (
+              <form onSubmit={handleSendResetLink} className="space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-[#4c5b71]/10 text-[#4c5b71] flex items-center justify-center shrink-0">
+                    <KeyRound className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-lg text-[#1e293b]">Forgot Password?</h3>
+                    <p className="text-xs text-slate-500">Enter your email to receive a password reset link.</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#1e293b] mb-1.5">Registered Email</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      value={forgotEmail}
+                      onChange={(e) => {
+                        setForgotEmail(e.target.value);
+                        setForgotError('');
+                      }}
+                      placeholder="e.g. nitish@example.com"
+                      className="w-full bg-[#f8f9fb] border border-slate-200 rounded-xl py-3 pl-10 pr-3 text-xs text-[#1e293b] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4c5b71]"
+                      autoFocus
+                    />
+                  </div>
+                  {forgotError && (
+                    <p className="text-rose-600 text-[11px] font-semibold mt-1.5 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{forgotError}</span>
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className="flex-1 py-3 rounded-full text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 clay-btn-primary py-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Send Reset Link</span>
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 2: Link Sent Confirmation */}
+            {forgotStep === 'sent' && (
+              <div className="text-center space-y-4 py-2">
+                <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
+                  <Mail className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-lg text-[#1e293b] mb-1">Reset Link Sent!</h3>
+                  <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
+                    We've sent a password reset link to <span className="font-bold text-[#1e293b]">{forgotEmail}</span>.
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-left text-xs space-y-2">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono-code font-bold">
+                    <span>RESET LINK GENERATED</span>
+                    <span className="text-emerald-600 font-semibold">Active</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600">
+                    Click below to open the reset link directly and set your new password.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleOpenResetForm}
+                    className="w-full mt-1.5 py-2.5 px-3 bg-[#4c5b71] hover:bg-[#3d4b5d] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                    <span>Open Reset Link & Change Password</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                >
+                  Close Window
+                </button>
+              </div>
+            )}
+
+            {/* STEP 3: Reset Password Form */}
+            {forgotStep === 'reset' && (
+              <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+                {resetSuccess ? (
+                  <div className="text-center py-4 space-y-2">
+                    <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
+                    <h3 className="font-extrabold text-lg text-[#1e293b]">Password Reset Complete!</h3>
+                    <p className="text-xs text-slate-600">You can now sign in with your new password.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <Lock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-lg text-[#1e293b]">Reset Password</h3>
+                        <p className="text-xs text-slate-500">Create a new password for <span className="font-semibold">{forgotEmail}</span></p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#1e293b] mb-1.5">New Password</label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                          className="w-full bg-[#f8f9fb] border border-slate-200 rounded-xl py-3 pl-10 pr-3 text-xs text-[#1e293b] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4c5b71]"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#1e293b] mb-1.5">Confirm New Password</label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm new password"
+                          className="w-full bg-[#f8f9fb] border border-slate-200 rounded-xl py-3 pl-10 pr-3 text-xs text-[#1e293b] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4c5b71]"
+                          required
+                        />
+                      </div>
+                      {forgotError && (
+                        <p className="text-rose-600 text-[11px] font-semibold mt-1.5 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{forgotError}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2.5 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setForgotStep('sent')}
+                        className="flex-1 py-3 rounded-full text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 clay-btn-primary py-3 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Update Password</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

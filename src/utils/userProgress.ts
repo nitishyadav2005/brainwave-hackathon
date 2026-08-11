@@ -5,11 +5,13 @@ export function createNewUser(
   name: string,
   email: string,
   college?: string,
-  track?: string
+  track?: string,
+  password?: string
 ): UserProfile {
   return {
     name: formatFirstName(name),
     email: email.trim(),
+    password: password,
     college: college?.trim() || 'ABES Engineering College',
     track: track?.trim() || 'Full Stack Development',
     currentDay: 1,
@@ -40,11 +42,15 @@ export function loadUserProfile(email?: string): UserProfile | null {
     const specific = localStorage.getItem(`abtalks_user_${emailKey}`);
     if (specific) {
       try {
-        return JSON.parse(specific);
+        const parsed = JSON.parse(specific);
+        if (parsed && parsed.email && parsed.email.toLowerCase().trim() === emailKey) {
+          return parsed;
+        }
       } catch {
-        // fallback
+        return null;
       }
     }
+    return null;
   }
 
   const active = localStorage.getItem('abtalks_user');

@@ -611,6 +611,45 @@ STATIC DEPLOYMENT AUTHENTICATION FALLBACK
    - Preserved specific backend validation error responses (e.g. 400 Bad Request with custom error messages) when a real backend server is present.
 ```
 
+---
+
+## 32. Fixed Email & Password Storage per User Account
+
+```text
+STRICT FIXED EMAIL & PASSWORD PERSISTENCE
+
+1. Password Storage:
+   - Added `password` field to UserProfile interface and `createNewUser` utility.
+   - Upon sign up, the user's password is saved along with their user profile in `localStorage` under `abtalks_user_<email>`.
+2. Strict Account Validation on Sign Up:
+   - Before creating an account, checks if an account with that email already exists.
+   - If email is already registered, blocks creation with error: "An account with this email already exists. Please sign in instead."
+3. Strict Password Verification on Sign In:
+   - Looks up the account specifically by the provided email address.
+   - If no account exists with that email, displays error: "No account found with this email. Please sign up first."
+   - If account exists, verifies that the entered password matches the stored account password. If password does not match, displays: "Incorrect password. Please try again."
+```
+
+---
+
+## 33. Forgot Password Reset Link & Password Update Flow
+
+```text
+FORGOT PASSWORD RESET LINK & ACCOUNT RECOVERY
+
+1. Registered Email Check:
+   - Clicking "Forgot password?" opens a dedicated Modal dialog.
+   - User inputs their registered email address. The system validates if an account exists for that email (`loadUserProfile`).
+   - If no account exists, displays inline error: "No account found with this email address."
+2. Reset Link Generation & Dispatch:
+   - Upon entering a valid registered email, advances to "Reset Link Sent!" screen.
+   - Confirms that a password reset link has been dispatched to the user's email address.
+3. Interactive Password Reset:
+   - Provides a direct "Open Reset Link & Change Password" trigger within the modal.
+   - Allows the user to enter and confirm a new password.
+   - Updates the user's account password in persistent storage (`saveUserProfile`), auto-fills the sign-in form with the new credentials, and confirms successful password update.
+```
+
 
 
 
