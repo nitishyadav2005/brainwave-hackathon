@@ -16,7 +16,7 @@ public class HealthController {
     public ResponseEntity<Map<String, String>> healthCheck() {
         Map<String, String> response = new HashMap<>();
         response.put("status", "ok");
-        response.put("message", "ABTalks backend is running");
+        response.put("message", "CodeTrack backend is running");
         return ResponseEntity.ok(response);
     }
 }

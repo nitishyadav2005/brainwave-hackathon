@@ -23,9 +23,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       <div className="w-full max-w-md md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center gap-3">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-[#4c5b71] text-white flex items-center justify-center font-bold text-xs">
-            AB
+            CT
           </div>
-          <span className="font-extrabold text-base text-[#1e293b]">ABTalks</span>
+          <span className="font-extrabold text-base text-[#1e293b]">CodeTrack</span>
         </div>
 
         <p className="text-xs font-semibold text-slate-600 tracking-wide">
@@ -55,7 +55,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
 
         <p className="text-[11px] font-mono-code text-slate-400 mt-2">
-          © 2026 ABTalks • Free 60-Day Coding Challenge
+          © 2026 CodeTrack • Free 60-Day Coding Challenge
         </p>
       </div>
     </footer>

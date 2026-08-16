@@ -1,6 +1,6 @@
 {
-  "name": "Remix ABTalks",
-  "description": "60-Day Coding Challenge platform for Indian college students.",
+  "name": "CodeTrack",
+  "description": "CodeTrack 60-Day Coding Challenge and proof of work tracking platform for student developers.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

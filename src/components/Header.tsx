@@ -27,16 +27,16 @@ export const Header: React.FC<HeaderProps> = ({ onOpenTrackModal, onNavigate }) 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#f4f6f8]/90 backdrop-blur-md border-b border-slate-200/60 transition-all">
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-        {/* Left: ABTalks Logo Branding */}
+        {/* Left: CodeTrack Logo Branding */}
         <div
           onClick={() => handleNavClick('/')}
           className="flex items-center gap-2 cursor-pointer select-none"
         >
           <div className="w-8 h-8 rounded-lg bg-[#4c5b71] text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
-            AB
+            CT
           </div>
           <span className="font-extrabold text-xl tracking-tight text-[#1e293b]">
-            ABTalks
+            CodeTrack
           </span>
         </div>
 

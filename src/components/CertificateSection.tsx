@@ -22,7 +22,7 @@ export const CertificateSection: React.FC<CertificateSectionProps> = ({ onStartC
           <span className="text-[#4c5b71]">A certificate to prove you finished.</span>
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 mt-2.5 max-w-md mx-auto leading-relaxed">
-          Complete all 60 challenge days and finish your project to earn your ABTalks Completion Certificate.
+          Complete all 60 challenge days and finish your project to earn your CodeTrack Completion Certificate.
         </p>
       </div>
 
@@ -39,7 +39,7 @@ export const CertificateSection: React.FC<CertificateSectionProps> = ({ onStartC
             <div className="border border-amber-300/80 bg-gradient-to-b from-amber-50/50 via-white to-slate-50/60 rounded-2xl p-5 sm:p-6 text-center space-y-4 shadow-xs relative">
               <div className="inline-flex items-center gap-1.5 bg-[#4c5b71] text-white font-mono-code text-[10px] sm:text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                 <Award className="w-3 h-3 text-amber-300" />
-                <span>ABTALKS</span>
+                <span>CodeTrack</span>
               </div>
 
               <div>
@@ -79,13 +79,13 @@ export const CertificateSection: React.FC<CertificateSectionProps> = ({ onStartC
               {/* Footer Verification Row */}
               <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-[10px] font-mono-code text-slate-500">
                 <span>Official Credential</span>
-                <span className="font-bold text-slate-800">ABTalks Verified</span>
+                <span className="font-bold text-slate-800">CodeTrack Verified</span>
               </div>
             </div>
           </div>
 
           <p className="text-[11px] font-mono-code text-slate-500 text-center mt-4">
-            Official ABTalks digital credential issued upon project completion.
+            Official CodeTrack digital credential issued upon project completion.
           </p>
         </div>
 

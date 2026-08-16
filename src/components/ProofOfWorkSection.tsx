@@ -15,7 +15,7 @@ export const ProofOfWorkSection: React.FC = () => {
           Your progress shouldn't disappear after you close your laptop.
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
-          ABTalks turns daily coding into public proof of work.
+          CodeTrack turns daily coding into public proof of work.
         </p>
       </div>
 

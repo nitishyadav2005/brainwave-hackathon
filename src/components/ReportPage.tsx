@@ -87,7 +87,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
         const html2pdf = (html2pdfModule.default || html2pdfModule) as any;
         const opt = {
           margin: [0.3, 0.3, 0.3, 0.3],
-          filename: `ABTalks_Report_0${report.id}_${studentName.replace(/\s+/g, '_')}.pdf`,
+          filename: `CodeTrack_Report_0${report.id}_${studentName.replace(/\s+/g, '_')}.pdf`,
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, logging: false },
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -105,12 +105,12 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
   };
 
   const handleShare = async () => {
-    const shareText = `I just completed ${report.isFinal ? '60' : '10'} days of the ABTalks 60-Day Coding Challenge.\n\n${report.buildsCount} builds.\n${report.githubCommits} GitHub commits.\n${report.linkedinPosts} LinkedIn posts.\n\n${report.periodLabel} complete.\n\n#ABTalks #60DayChallenge #BuildInPublic`;
+    const shareText = `I just completed ${report.isFinal ? '60' : '10'} days of the CodeTrack 60-Day Coding Challenge.\n\n${report.buildsCount} builds.\n${report.githubCommits} GitHub commits.\n${report.linkedinPosts} LinkedIn posts.\n\n${report.periodLabel} complete.\n\n#CodeTrack #60DayChallenge #BuildInPublic`;
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `ABTalks - ${report.title}`,
+          title: `CodeTrack - ${report.title}`,
           text: shareText,
         });
         return;
@@ -206,7 +206,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
 
         <div className="text-center">
           <span className="font-mono-code text-[11px] font-extrabold text-[#4c5b71] tracking-wider uppercase">
-            ABTalks Report 0{report.id}
+            CodeTrack Report 0{report.id}
           </span>
         </div>
 
@@ -228,7 +228,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <span className="font-black text-xl tracking-tight text-[#191c1e]">
-                ABTalks
+                CodeTrack
               </span>
               <span className="text-[10px] font-mono-code font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded">
                 VERIFIED REPORT
@@ -283,7 +283,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
                   Challenge
                 </span>
                 <span className="font-medium text-slate-700 truncate">
-                  ABTalks 60-Day
+                  CodeTrack 60-Day
                 </span>
               </div>
             </div>
@@ -381,7 +381,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ reportId, user, onNaviga
 
                 <div className="flex items-center gap-2 pt-1 font-mono-code text-[10px] text-slate-500">
                   <span className="truncate text-slate-600 underline">
-                    GitHub: abtalks-day{item.day < 10 ? `0${item.day}` : item.day}
+                    GitHub: codetrack-day{item.day < 10 ? `0${item.day}` : item.day}
                   </span>
                 </div>
               </div>

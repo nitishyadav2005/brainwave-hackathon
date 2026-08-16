@@ -414,7 +414,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <span>Dashboard</span>
           </button>
 
-          <span className="font-extrabold text-sm text-[#4c5b71]">ABTalks Profile</span>
+          <span className="font-extrabold text-sm text-[#4c5b71]">CodeTrack Profile</span>
         </div>
       </header>
 
@@ -739,7 +739,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             onClick={() => onNavigate('/')}
             className="w-full text-left py-2.5 px-3 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-between cursor-pointer"
           >
-            <span>Back to ABTalks Landing</span>
+            <span>Back to CodeTrack Landing</span>
             <ArrowLeft className="w-4 h-4 rotate-180 text-slate-400" />
           </button>
 
@@ -890,7 +890,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
 
                 <p className="text-xs text-slate-500 font-medium">
-                  Choose a photo for your ABTalks profile
+                  Choose a photo for your CodeTrack profile
                 </p>
               </>
             )}

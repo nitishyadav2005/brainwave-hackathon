@@ -24,15 +24,15 @@ export const ProofCard: React.FC<ProofCardProps> = ({
   const userTrack = user?.track || 'Full Stack Development';
   const userCollege = user?.college || 'ABES Engineering College';
 
-  const shareText = `Day ${dayNumber} of my ABTalks coding challenge complete! 🔥\n\nI built something useful with an API and maintained my ${dayNumber}-day streak.\n\n#ABTalks #60DayChallenge #BuildInPublic`;
+  const shareText = `Day ${dayNumber} of my CodeTrack coding challenge complete! 🔥\n\nI built something useful with an API and maintained my ${dayNumber}-day streak.\n\n#CodeTrack #60DayChallenge #BuildInPublic`;
 
-  const copyText = `ABTalks — Day ${dayNumber} / 60 ✓\n\n${missionTitle}\nGitHub ✓\nLinkedIn ✓\n${dayNumber} Day Streak 🔥\n\n${userName}\n${userTrack}\n\n#ABTalks #60DayChallenge #BuildInPublic`;
+  const copyText = `CodeTrack — Day ${dayNumber} / 60 ✓\n\n${missionTitle}\nGitHub ✓\nLinkedIn ✓\n${dayNumber} Day Streak 🔥\n\n${userName}\n${userTrack}\n\n#CodeTrack #60DayChallenge #BuildInPublic`;
 
   const handleShare = async () => {
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `ABTalks - Day ${dayNumber} Complete`,
+          title: `CodeTrack - Day ${dayNumber} Complete`,
           text: shareText,
         });
         return;
@@ -77,7 +77,7 @@ export const ProofCard: React.FC<ProofCardProps> = ({
         {/* Top Header: Brand & Day Badge */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <span className="font-black text-lg tracking-tight text-[#191c1e]">
-            ABTalks
+            CodeTrack
           </span>
           <span className="font-mono-code text-[11px] font-extrabold text-[#4c5b71] bg-slate-100 border border-slate-200/80 px-2.5 py-0.5 rounded-full">
             DAY {dayNumber} / 60

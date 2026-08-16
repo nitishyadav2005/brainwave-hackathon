@@ -207,7 +207,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
             onClick={() => onNavigate('/')}
             className="font-extrabold text-xl tracking-tight text-[#4c5b71] cursor-pointer select-none"
           >
-            ABTalks
+            CodeTrack
           </span>
 
           {/* Desktop header navigation links */}
@@ -468,7 +468,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
           <div className="space-y-1.5">
             <h2 className="text-xl font-bold text-[#191c1e] leading-snug">
               {isFirstDay
-                ? 'Welcome to ABTalks & First Commit'
+                ? 'Welcome to CodeTrack & First Commit'
                 : currentDay === 13
                 ? 'Deploy your project to production'
                 : 'Build something useful with an API'}
@@ -723,7 +723,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ user, onNavigate, 
                     </span>
                     <h3 className="text-lg font-extrabold text-[#191c1e]">
                       {selectedReportModal.reportDef.isFinal
-                        ? 'ABTalks Final Project Report'
+                        ? 'CodeTrack Final Project Report'
                         : `Progress Report 0${selectedReportModal.reportId}`}
                     </h3>
                     <p className="font-mono-code text-xs font-bold text-slate-500 pt-0.5">

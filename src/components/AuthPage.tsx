@@ -404,10 +404,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
 
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-[#4c5b71] text-white flex items-center justify-center font-extrabold text-xs shadow-xs">
-              AB
+              CT
             </div>
             <span className="font-extrabold text-lg tracking-tight text-[#1e293b]">
-              ABTalks
+              CodeTrack
             </span>
           </div>
 
@@ -422,7 +422,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
             <Check className="w-8 h-8 stroke-[3]" />
           </div>
           <h2 className="text-2xl font-extrabold text-[#1e293b] mb-2">
-            Welcome to ABTalks.
+            Welcome to CodeTrack.
           </h2>
           <p className="text-sm font-semibold text-[#4c5b71] max-w-xs">
             Your 60-day journey starts now.
@@ -447,7 +447,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
                 Ready to start your 60 days?
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 max-w-xs mx-auto leading-relaxed">
-                Create your ABTalks account and start building your public coding streak.
+                Create your CodeTrack account and start building your public coding streak.
               </p>
             </div>
 
@@ -466,7 +466,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
                     Sign in
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Already have an ABTalks account?
+                    Already have a CodeTrack account?
                   </p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[#4c5b71] group-hover:bg-[#4c5b71] group-hover:text-white transition-all">
@@ -490,7 +490,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
                     Create account
                   </h3>
                   <p className="text-xs text-slate-500">
-                    New to ABTalks? Start your journey here.
+                    New to CodeTrack? Start your journey here.
                   </p>
                 </div>
                 <div className="w-9 h-9 rounded-full bg-[#4c5b71] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-all">
@@ -834,7 +834,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onNavigate, onLoginSuccess }
 
       {/* FOOTER */}
       <footer className="w-full text-center py-4 text-[11px] font-mono-code text-slate-400">
-        ABTalks 60-Day Challenge • Proof of Work
+        CodeTrack 60-Day Challenge • Proof of Work
       </footer>
 
       {/* FORGOT PASSWORD MODAL */}

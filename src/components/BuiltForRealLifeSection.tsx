@@ -16,7 +16,7 @@ export const BuiltForRealLifeSection: React.FC = () => {
           Because college doesn't stop for a coding challenge.
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 mt-2 max-w-lg mx-auto leading-relaxed">
-          Miss a day? Life happens. ABTalks gives you Streak Protection so you keep momentum without losing your hard-earned progress.
+          Miss a day? Life happens. CodeTrack gives you Streak Protection so you keep momentum without losing your hard-earned progress.
         </p>
       </div>
 

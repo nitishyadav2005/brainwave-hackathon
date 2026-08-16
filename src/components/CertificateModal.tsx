@@ -56,7 +56,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 bg-[#4c5b71] text-white font-mono-code text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
               <Award className="w-3.5 h-3.5 text-amber-300" />
-              <span>ABTalks 60-Day Coding Challenge</span>
+              <span>CodeTrack 60-Day Coding Challenge</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#191c1e] tracking-tight uppercase pt-2">
               COMPLETION CERTIFICATE
@@ -76,7 +76,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-md mx-auto leading-relaxed pt-2">
-              has successfully completed the <strong>ABTalks 60-Day Coding Challenge</strong>, demonstrating exceptional consistency, discipline, and technical execution.
+              has successfully completed the <strong>CodeTrack 60-Day Coding Challenge</strong>, demonstrating exceptional consistency, discipline, and technical execution.
             </p>
           </div>
 

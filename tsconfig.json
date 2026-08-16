@@ -1,26 +1,39 @@
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "module": "ESNext",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "allowJs": true,
-    "jsx": "react-jsx",
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    },
-    "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+export interface TrackOption {
+  id: string;
+  title: string;
+  tagline: string;
+  skills: string[];
+  totalDays: number;
+  featuredProject: string;
+  badge: string;
 }
+
+export interface GridDayState {
+  day: number;
+  status: 'completed' | 'current' | 'upcoming';
+  title?: string;
+}
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  password?: string;
+  avatar?: string;
+  college?: string;
+  track?: string;
+  streak: number;
+  longestStreak?: number;
+  currentDay?: number;
+  completedDays?: number;
+  day12Completed?: boolean;
+  missedYesterday?: boolean;
+  streakSaversTotal?: number;
+  streakSaversUsed?: number;
+  streakSaversRemaining?: number;
+  streakSaverProtectedYesterday?: boolean;
+  projectCompleted?: boolean;
+  challengeStatus?: 'active' | 'completed';
+  isAuthenticated: boolean;
+}
+
+export type AuthMode = 'select' | 'signin' | 'signup';

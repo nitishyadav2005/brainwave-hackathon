@@ -1,6 +1,6 @@
-# ABTalks - Java Spring Boot Backend Foundation
+# CodeTrack - Java Spring Boot Backend Foundation
 
-This is the Java Spring Boot backend service foundation for the ABTalks 60-Day Code Challenge platform.
+This is the Java Spring Boot backend service foundation for the CodeTrack 60-Day Code Challenge platform.
 
 ## Architecture & Package Structure
 
@@ -54,7 +54,7 @@ To verify that the Spring Boot backend is running successfully:
   ```json
   {
     "status": "ok",
-    "message": "ABTalks backend is running"
+    "message": "CodeTrack backend is running"
   }
   ```
 
